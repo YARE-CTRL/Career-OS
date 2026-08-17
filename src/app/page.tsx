@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import HeroCTA from "@/components/HeroCTA";
 import { motion, type Variants } from "framer-motion";
 import {
   AlertTriangle,
@@ -90,90 +92,105 @@ function HeroSection() {
         }}
       />
 
-      <motion.div
-        className="max-w-4xl mx-auto text-center flex flex-col items-center gap-6"
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Tag */}
-        <motion.div variants={fadeUp}>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium">
-            <Sparkles size={14} />
-            Impulsado por Inteligencia Artificial
-          </span>
-        </motion.div>
+      {/* ─── Two-column layout on large screens ─── */}
+      <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-        {/* Headline */}
-        <motion.h1
-          variants={fadeUp}
-          className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none text-text-main"
-        >
-          CAREER{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-            OS AI
-          </span>
-        </motion.h1>
-
-        {/* Subheadline */}
-        <motion.p
-          variants={fadeUp}
-          className="text-lg sm:text-2xl font-semibold text-text-main/80 max-w-2xl"
-        >
-          De estudiante a profesional con sistema e IA
-        </motion.p>
-
-        {/* Body copy */}
-        <motion.p
-          variants={fadeUp}
-          className="text-base sm:text-lg text-text-main/50 max-w-xl"
-        >
-          No es una plantilla. Es tu sistema de crecimiento.
-        </motion.p>
-
-        {/* CTA Buttons */}
+        {/* Left column: text + CTAs */}
         <motion.div
-          variants={fadeUp}
-          className="flex flex-col sm:flex-row gap-4 mt-4"
+          className="flex-1 flex flex-col items-center lg:items-start gap-6 text-center lg:text-left"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
         >
-          <Link
-            href="/onboarding"
-            id="hero-cta-primary"
-            className="group flex items-center justify-center gap-2 rounded-full bg-primary text-background font-bold text-base px-8 py-4 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
+          {/* Tag */}
+          <motion.div variants={fadeUp}>
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium">
+              <Sparkles size={14} />
+              Impulsado por Inteligencia Artificial
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            variants={fadeUp}
+            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none text-text-main"
           >
-            Empieza gratis hoy
-            <ArrowRight
-              size={18}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </Link>
-          <a
-            href="#como-funciona"
-            id="hero-cta-secondary"
-            className="group flex items-center justify-center gap-2 rounded-full border border-text-main/30 text-text-main font-semibold text-base px-8 py-4 hover:border-text-main/70 hover:bg-text-main/5 transition-all duration-300"
+            CAREER{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+              OS AI
+            </span>
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            variants={fadeUp}
+            className="text-lg sm:text-2xl font-semibold text-text-main/80 max-w-2xl"
           >
-            <Play size={16} className="text-primary" />
-            Ver cómo funciona
-          </a>
+            De estudiante a profesional con sistema e IA
+          </motion.p>
+
+          {/* Body copy */}
+          <motion.p
+            variants={fadeUp}
+            className="text-base sm:text-lg text-text-main/50 max-w-xl"
+          >
+            No es una plantilla. Es tu sistema de crecimiento.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col sm:flex-row gap-4 mt-4"
+          >
+            <HeroCTA />
+            <a
+              href="#como-funciona"
+              id="hero-cta-secondary"
+              className="group flex items-center justify-center gap-2 rounded-full border border-text-main/30 text-text-main font-semibold text-base px-8 py-4 hover:border-text-main/70 hover:bg-text-main/5 transition-all duration-300"
+            >
+              <Play size={16} className="text-primary" />
+              Ver cómo funciona
+            </a>
+          </motion.div>
+
+          {/* Social proof strip */}
+          <motion.div
+            variants={fadeUp}
+            className="flex items-center gap-3 mt-2 text-text-main/40 text-sm"
+          >
+            <div className="flex -space-x-2">
+              {["#00D4AA", "#7B61FF", "#FFB347", "#FF6B6B"].map((c, i) => (
+                <div
+                  key={i}
+                  className="w-7 h-7 rounded-full border-2 border-background"
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+            <span>+200 estudiantes ya usan Career OS AI</span>
+          </motion.div>
         </motion.div>
 
-        {/* Social proof strip */}
+        {/* Right column: hero image — visible only on lg+ */}
         <motion.div
-          variants={fadeUp}
-          className="flex items-center gap-3 mt-6 text-text-main/40 text-sm"
+          className="hidden lg:flex flex-1 items-center justify-center relative"
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex -space-x-2">
-            {["#00D4AA", "#7B61FF", "#FFB347", "#FF6B6B"].map((c, i) => (
-              <div
-                key={i}
-                className="w-7 h-7 rounded-full border-2 border-background"
-                style={{ backgroundColor: c }}
-              />
-            ))}
-          </div>
-          <span>+200 estudiantes ya usan Career OS AI</span>
+          {/* Glow halo behind the image */}
+          <div className="absolute inset-0 rounded-3xl bg-primary/5 blur-3xl scale-110 -z-10" />
+          <Image
+            src="/assets/hero_dashboard_3d.png"
+            alt="Career OS AI — Dashboard preview 3D"
+            width={620}
+            height={420}
+            priority
+            className="rounded-2xl shadow-2xl shadow-primary/20 opacity-90 w-full max-w-[620px] object-cover"
+          />
         </motion.div>
-      </motion.div>
+
+      </div>
     </section>
   );
 }

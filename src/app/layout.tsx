@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { auth } from "@/auth";
+import SessionProviderWrapper from "@/providers/SessionProviderWrapper";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={jetbrainsMono.variable}>
       <body className={`${inter.className} bg-background text-text-main antialiased`}>
-        {children}
+        <SessionProviderWrapper>
+          {children}
+        </SessionProviderWrapper>
       </body>
     </html>
   );

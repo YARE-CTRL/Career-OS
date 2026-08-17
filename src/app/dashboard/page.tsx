@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { motion, type Variants } from "framer-motion";
+import Image from "next/image";
 import { useCareerStore } from "@/store";
 import {
   Brain,
@@ -83,13 +85,23 @@ export default function DashboardPage() {
   // AI Copilot Logic: find the first 'todo' task or default
   const nextTask = roadmap?.find(item => item.status === 'todo') || roadmap?.[0];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     clearStore();
-    router.push("/");
+    await signOut({ redirectTo: '/' });
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-main pb-24">
+    <div className="min-h-screen bg-background text-text-main pb-24 relative">
+      {/* ─── Background constellation texture ─── */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden>
+        <Image
+          src="/assets/dashboard_bg.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover opacity-10"
+        />
+      </div>
       {/* ─── Header ──────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-text-main/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -205,13 +217,41 @@ export default function DashboardPage() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2 mb-1">
                             <h3 className="font-bold text-white text-base">{item.title}</h3>
-                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-full bg-background/50 text-text-main/60">
-                              {item.type}
-                            </span>
+                            <div className="flex gap-2 items-center">
+                              {item.duration && (
+                                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                  {item.duration}
+                                </span>
+                              )}
+                              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-full bg-background/50 text-text-main/60">
+                                {item.type}
+                              </span>
+                            </div>
                           </div>
-                          <p className="text-text-main/70 text-sm leading-relaxed">
+                          <p className="text-text-main/70 text-sm leading-relaxed mb-3">
                             {item.description}
                           </p>
+                          
+                          {/* Nuevos campos Premium */}
+                          {item.resources && item.resources.length > 0 && (
+                            <div className="mb-2">
+                              <p className="text-xs font-bold text-white/80 mb-1">Recursos Clave:</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {item.resources.map((res, i) => (
+                                  <span key={i} className="text-[10px] px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/60">
+                                    {res}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {item.successCriteria && (
+                            <div className="mt-2 p-2 rounded-lg bg-secondary/10 border border-secondary/20">
+                              <p className="text-xs text-secondary/90">
+                                <span className="font-bold">🎯 Meta:</span> {item.successCriteria}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))
@@ -255,9 +295,9 @@ export default function DashboardPage() {
                     <p className="text-white/60 text-sm italic">Sigue tu ritmo establecido.</p>
                   )}
                   
-                  <button className="w-full mt-4 bg-white text-secondary font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-white/90 transition-colors">
-                    Pedir consejo específico
-                  </button>
+                  <div className="w-full mt-4 bg-white/10 text-white/50 font-semibold py-2.5 rounded-xl text-sm text-center border border-white/10 cursor-default select-none">
+                    ✨ Consejo personalizado — Próximamente
+                  </div>
                 </div>
               </motion.div>
 

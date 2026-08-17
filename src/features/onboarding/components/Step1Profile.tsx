@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { step1Schema, type Step1Data } from '../schemas/onboardingSchema';
 import { stagger, fadeUp, inputCls, labelCls } from './shared';
+import { NotionPageSelector } from '@/components/NotionPageSelector';
+import { useCareerStore } from '@/store';
 
 interface Props {
   defaultValues: Step1Data;
@@ -27,6 +29,7 @@ export function Step1Profile({ defaultValues, onNext }: Props) {
   });
 
   const selectedLevel = watch('level');
+  const selectedPageId = useCareerStore((s) => s.selectedPageId);
 
   return (
     <motion.form
@@ -46,6 +49,11 @@ export function Step1Profile({ defaultValues, onNext }: Props) {
         <p className="text-text-main/40 text-sm mt-1">
           Cuéntanos un poco sobre ti para personalizar tu experiencia.
         </p>
+      </motion.div>
+
+      {/* Notion Page Selector */}
+      <motion.div variants={fadeUp} className="mb-2">
+        <NotionPageSelector />
       </motion.div>
 
       {/* Nombre */}
@@ -108,7 +116,12 @@ export function Step1Profile({ defaultValues, onNext }: Props) {
         <button
           id="step1-next"
           type="submit"
-          className="w-full flex items-center justify-center gap-2 rounded-full bg-primary text-background font-bold py-4 text-sm shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] transition-all duration-200"
+          disabled={!selectedPageId}
+          className={`w-full flex items-center justify-center gap-2 rounded-full font-bold py-4 text-sm shadow-lg transition-all duration-200 ${
+            selectedPageId
+              ? 'bg-primary text-background shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02]'
+              : 'bg-primary/50 text-background/50 cursor-not-allowed shadow-none'
+          }`}
         >
           Siguiente
           <ArrowRight size={16} />

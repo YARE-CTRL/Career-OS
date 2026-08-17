@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, Brain, CheckCircle, LayoutDashboard, Rocket, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -29,8 +30,12 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
   const [msgIndex, setMsgIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isQuotaError, setIsQuotaError] = useState(false);
-  const setProfile = useCareerStore((s) => s.setProfile);
-  const setSystemData = useCareerStore((s) => s.setSystemData);
+
+  // ─── FIX: usar generateRoadmap del store, que ya inyecta parent_id ──────────
+  // El fetch manual anterior enviaba solo `formData` sin `parent_id`, causando
+  // el error 400. generateRoadmap() lee selectedPageId del store e incluye
+  // parent_id en el POST. También llama setProfile y setSystemData internamente.
+  const generateRoadmap = useCareerStore((s) => s.generateRoadmap);
 
   useEffect(() => {
     const msgInterval = setInterval(() => {
@@ -38,43 +43,43 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
     }, 600);
 
     let isMounted = true;
+    let fallbackTimeout: NodeJS.Timeout;
 
     const generateSystem = async () => {
       try {
-        const res = await fetch('/api/generate-system', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+        // Fallback de seguridad: Si la promesa se queda colgada (pasa a veces con middleware o proxy), 
+        // forzamos un error tras 60 segundos.
+        const timeoutPromise = new Promise((_, reject) => {
+          fallbackTimeout = setTimeout(() => reject(new Error('La petición tardó demasiado.')), 60000);
         });
 
-        const data = await res.json();
+        await Promise.race([
+          generateRoadmap(formData),
+          timeoutPromise
+        ]);
 
-        // Manejo específico de cuota excedida (429)
-        if (res.status === 429) {
-          if (isMounted) {
-            clearInterval(msgInterval);
-            setIsQuotaError(true);
-            setError(data.error || 'Límite de uso alcanzado temporalmente.');
-          }
+        if (isMounted) {
+          clearInterval(msgInterval);
+          clearTimeout(fallbackTimeout);
+          onDone();
+        }
+      } catch (err: any) {
+        if (!isMounted) return;
+        clearInterval(msgInterval);
+        clearTimeout(fallbackTimeout);
+
+        console.error('[Step4] API Error caught:', err);
+
+        const errorMessage = err?.message || String(err);
+        
+        // Comprobar si es el límite de Upstash (ya sea por status o texto)
+        if (err?.status === 429 || errorMessage.toLowerCase().includes('límite')) {
+          setIsQuotaError(true);
+          setError(errorMessage || 'Límite de uso alcanzado temporalmente.');
           return;
         }
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Error al generar el sistema');
-        }
-
-        if (isMounted) {
-          setProfile(formData);
-          setSystemData(data.roadmap, data.notionUrl);
-          clearInterval(msgInterval);
-          onDone();
-        }
-      } catch (err: unknown) {
-        if (isMounted) {
-          clearInterval(msgInterval);
-          const message = err instanceof Error ? err.message : 'Error desconocido';
-          setError(message);
-        }
+        setError(errorMessage || 'Error desconocido al procesar.');
       }
     };
 
@@ -84,7 +89,7 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
       isMounted = false;
       clearInterval(msgInterval);
     };
-  }, [formData, onDone, setProfile, setSystemData]);
+  }, [formData, onDone, generateRoadmap]);
 
   // ─── Error State ─────────────────────────────────────────────────────────────
 
@@ -161,8 +166,19 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
       animate="visible"
       className="flex flex-col items-center gap-8 py-6 text-center"
     >
-      {/* Pulsing brain icon with rings */}
+      {/* Pulsing brain icon with rings + AI background */}
       <motion.div variants={fadeUp} className="relative flex items-center justify-center">
+        {/* Blurred AI visual behind spinner */}
+        <div className="absolute w-52 h-52 rounded-full overflow-hidden -z-10">
+          <Image
+            src="/assets/processing_ai.png"
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover opacity-30 blur-sm scale-110"
+            aria-hidden
+          />
+        </div>
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
@@ -243,7 +259,7 @@ export function Step5Success() {
       animate="visible"
       className="flex flex-col items-center gap-6 py-4 text-center"
     >
-      {/* Check icon with burst animation */}
+      {/* Check icon with burst animation + celebration background */}
       <motion.div
         variants={{
           hidden: { scale: 0, opacity: 0 },
@@ -255,6 +271,16 @@ export function Step5Success() {
         }}
         className="relative"
       >
+        {/* Celebration background image */}
+        <div className="absolute -inset-12 rounded-full overflow-hidden -z-10 pointer-events-none" aria-hidden>
+          <Image
+            src="/assets/success_celebration.png"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover opacity-20 blur-[2px] scale-110"
+          />
+        </div>
         <div className="w-24 h-24 rounded-full bg-background/20 flex items-center justify-center">
           <CheckCircle size={56} className="text-background" strokeWidth={2.5} />
         </div>
