@@ -2,6 +2,8 @@
 
 Planifica tu carrera con Inteligencia Artificial y materializa tus objetivos de crecimiento en un espacio de productividad dinámico.
 
+🔗 **[Visita la aplicación en vivo: careeros-yare.vercel.app](https://careeros-yare.vercel.app)**
+
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
@@ -20,7 +22,7 @@ A través de un flujo intuitivo y gamificado, el sistema recopila las habilidade
 
 ## 🛠️ Arquitectura del Sistema (Technical Deep Dive)
 
-La aplicación sigue una arquitectura modular en el frontend y una capa segura de servicios serverless en el backend:
+La aplicación sigue una arquitectura modular en el frontend y una capa segura de servicios serverless en el backend, apoyada por bases de datos en memoria para resiliencia:
 
 ```mermaid
 graph TD
@@ -35,11 +37,12 @@ graph TD
 ```
 
 ### Flujo de Datos Técnico:
-1. **Orquestación del Cliente (Zustand)**: El formulario multi-paso recolecta y valida la información del usuario en cada pantalla. Una vez completado, el estado consolidado se envía en un solo payload optimizado a nuestro endpoint proxy.
-2. **API Proxy Seguro**: Las rutas de API de Next.js (`/api/generate-system`) sirven como un puente seguro, ocultando credenciales sensibles (`NOTION_TOKEN`, `GEMINI_API_KEY`) del lado del cliente.
-3. **Generación con Structured Outputs**: Se realiza una consulta a la API de **Gemini** configurando `responseMimeType: 'application/json'` y definiendo un `responseSchema` estricto en el SDK. Esto garantiza que la respuesta sea un array JSON analizable con propiedades consistentes.
-4. **Integración con la API de Notion**: Recibido el JSON estructurado, la ruta del backend inicializa el cliente oficial de Notion (`@notionhq/client`) y crea una nueva página dentro de la base de datos relacional del usuario, insertando los bloques dinámicos para el roadmap personalizado.
-5. **Consumo Dinámico**: La API responde con el roadmap generado y la URL de Notion, actualizando el store de Zustand para sincronizar de manera reactiva la interfaz del Dashboard.
+1. **Autenticación (OAuth Bypass)**: Se implementó un flujo manual de OAuth 2.0 con la API de Notion que sortea las limitaciones e incompatibilidades de librerías de terceros (NextAuth v5 beta), garantizando un intercambio de tokens (Token Exchange) directo y seguro para interactuar con el workspace del usuario.
+2. **Orquestación del Cliente (Zustand)**: El formulario multi-paso recolecta y valida la información del usuario en cada pantalla. Una vez completado, el estado consolidado se envía en un solo payload optimizado a nuestro endpoint proxy.
+3. **API Proxy Seguro y Rate Limiting**: Las rutas de API de Next.js (`/api/generate-system`) sirven como un puente seguro, ocultando credenciales sensibles. Esta capa está protegida por **Upstash Redis**, aplicando límites de peticiones (Rate Limiting) por sesión para proteger el acceso a las APIs de IA.
+4. **Generación con Structured Outputs**: Se realiza una consulta a la API de **Gemini** configurando `responseMimeType: 'application/json'` y definiendo un `responseSchema` estricto en el SDK. Esto garantiza que la respuesta sea un array JSON analizable con propiedades consistentes.
+5. **Integración con la API de Notion**: Recibido el JSON estructurado, la ruta del backend inicializa el cliente oficial de Notion (`@notionhq/client`) y crea una nueva página dentro de la base de datos relacional o workspace del usuario, insertando los bloques dinámicos para el roadmap personalizado.
+6. **Consumo Dinámico**: La API responde con el roadmap generado y la URL de Notion, actualizando el store de Zustand para sincronizar de manera reactiva la interfaz del Dashboard.
 
 ---
 
@@ -64,6 +67,8 @@ graph TD
 
 ### Backend & Integraciones
 - **API Engine**: Next.js Serverless Route Handlers
+- **Autenticación**: Flujo OAuth 2.0 manual (integrado con NextAuth/Credentials)
+- **Rate Limiting**: Upstash Redis (Memoria Caché distribuida)
 - **AI Core**: Google Generative AI SDK (Gemini API Integration)
 - **Base de Datos / Productividad**: Notion SDK Client
 - **Lenguaje**: TypeScript (Strict Mode)
