@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import Notion from 'next-auth/providers/notion';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  debug: true,
   trustHost: true,
   basePath: '/api/auth',
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
