@@ -12,6 +12,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.NOTION_CLIENT_SECRET!,
       redirectUri: `${process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? 'http://localhost:3000'}/api/auth/callback/notion`,
       checks: ["state"],
+      token: {
+        url: "https://api.notion.com/v1/oauth/token",
+        async request(context) {
+          const { provider, params: { code }, client } = context;
+          const credentials = Buffer.from(`${provider.clientId}:${provider.clientSecret}`).toString('base64');
+          const response = await fetch(provider.token?.url as string, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${credentials}`,
+              'Content-Type': 'application/json',
+              'Notion-Version': '2022-06-28',
+            },
+            body: JSON.stringify({
+              grant_type: 'authorization_code',
+              code: code,
+              redirect_uri: provider.redirectUri,
+            }),
+          });
+          const tokens = await response.json();
+          if (!response.ok) throw new Error(`Notion Token Error: ${JSON.stringify(tokens)}`);
+          return { tokens };
+        }
+      }
     }),
   ],
   callbacks: {
