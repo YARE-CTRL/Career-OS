@@ -76,6 +76,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw e;
           }
         }
+      },
+      profile(profile: any) {
+        const user = profile.bot?.owner?.user;
+        return {
+          id: user?.id || profile.id || "notion-id",
+          name: user?.name || profile.name || "Notion User",
+          email: user?.person?.email || "notion@careeros.local",
+          image: user?.avatar_url || profile.avatar_url || null,
+        };
       }
     }),
   ],
