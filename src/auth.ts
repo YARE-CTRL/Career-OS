@@ -20,6 +20,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   trustHost: true,
   basePath: '/api/auth',
+  providers: [
     CredentialsProvider({
       id: "notion-manual",
       name: "Notion Manual",
