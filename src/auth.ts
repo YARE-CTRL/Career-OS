@@ -14,16 +14,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       console.warn(`[AUTH_WARN] ${code}:`, message);
     },
     debug(code, ...message) {
-      console.log(`[AUTH_DEBUG] ${code}:`, JSON.stringify(message, null, 2));
+      const util = require('util');
+      console.log(`[AUTH_DEBUG] ${code}:`, util.inspect(message, { depth: null }));
     },
   },
   trustHost: true,
   basePath: '/api/auth',
   providers: [
-    Notion({
+    {
+      id: "notion",
+      name: "Notion",
+      type: "oauth",
       clientId: env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7',
       clientSecret: env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET,
-      redirectUri: `https://careeros-yare.vercel.app/api/auth/callback/notion`,
+      authorization: {
+        url: "https://api.notion.com/v1/oauth/authorize",
+        params: { owner: "user" },
+      },
       checks: [],
       token: {
         url: "https://api.notion.com/v1/oauth/token",
@@ -90,7 +97,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           image: user?.avatar_url || profile.avatar_url || null,
         };
       }
-    }),
+    }
   ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
