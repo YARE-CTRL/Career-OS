@@ -11,7 +11,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Notion({
       clientId: env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7',
       clientSecret: env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET,
-      redirectUri: `${env.AUTH_URL ?? env.NEXTAUTH_URL ?? 'http://localhost:3000'}/api/auth/callback/notion`,
+      redirectUri: `https://careeros-yare.vercel.app/api/auth/callback/notion`,
       checks: ["state"],
     }),
   ],
