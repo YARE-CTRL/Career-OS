@@ -24,13 +24,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7',
       clientSecret: env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET,
       redirectUri: `https://careeros-yare.vercel.app/api/auth/callback/notion`,
-      checks: ["state"],
+      checks: [],
       token: {
         url: "https://api.notion.com/v1/oauth/token",
         async request(context: any) {
           const { params: { code } } = context;
           const cid = env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7';
           const csec = env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET;
+          
+          console.log(`[AUTH_DIAGNOSTIC] Token Request Triggered. Code: ${code?.substring(0,5)}..., CID length: ${cid?.length}, Secret length: ${csec?.length}`);
+
           const credentials = btoa(`${cid}:${csec}`);
           const redirect = `https://careeros-yare.vercel.app/api/auth/callback/notion`;
           
