@@ -2,9 +2,7 @@ import NextAuth from 'next-auth';
 import Notion from 'next-auth/providers/notion';
 
 const env = process.env as any;
-console.log("=== NEXTAUTH INIT ===");
-console.log("Auth URL:", env.AUTH_URL);
-console.log("Client ID fallback used?", !env.AUTH_NOTION_ID && !env.NOTION_CLIENT_ID);
+console.log(`[AUTH_INIT_V2] Auth URL: ${env.AUTH_URL} | Fallback used? ${!env.AUTH_NOTION_ID && !env.NOTION_CLIENT_ID}`);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: true,
@@ -30,11 +28,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       token: {
         url: "https://api.notion.com/v1/oauth/token",
         async request(context: any) {
-          const { provider, params: { code } } = context;
-          const credentials = Buffer.from(`${provider.clientId}:${provider.clientSecret}`).toString('base64');
+          const { params: { code } } = context;
+          const cid = env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7';
+          const csec = env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET;
+          const credentials = btoa(`${cid}:${csec}`);
+          const redirect = `https://careeros-yare.vercel.app/api/auth/callback/notion`;
           
           try {
-            const response = await fetch(provider.token?.url as string, {
+            const response = await fetch("https://api.notion.com/v1/oauth/token", {
               method: 'POST',
               headers: {
                 'Authorization': `Basic ${credentials}`,
@@ -44,7 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               body: JSON.stringify({
                 grant_type: 'authorization_code',
                 code: code,
-                redirect_uri: provider.redirectUri,
+                redirect_uri: redirect,
               }),
             });
             
@@ -90,14 +91,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      console.log("=== SIGNIN CALLBACK TRIGGERED ===");
-      console.log("Account:", account);
+      console.log(`[SIGNIN_CALLBACK_V2] Provider: ${account?.provider} | Account: ${JSON.stringify(account)}`);
       return true;
     },
     async redirect({ url, baseUrl }) {
-      console.log("=== REDIRECT CALLBACK ===");
-      console.log("URL:", url);
-      console.log("Base URL:", baseUrl);
+      console.log(`[REDIRECT_CALLBACK_V2] URL: ${url} | Base URL: ${baseUrl}`);
       return url;
     },
     async session({ session, token }) {
