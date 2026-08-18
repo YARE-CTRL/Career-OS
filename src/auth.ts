@@ -1,15 +1,17 @@
 import NextAuth from 'next-auth';
 import Notion from 'next-auth/providers/notion';
 
+const env = process.env as any;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: true,
   trustHost: true,
   basePath: '/api/auth',
   providers: [
     Notion({
-      clientId: process.env["AUTH_NOTION_ID"] || process.env["NOTION_CLIENT_ID"],
-      clientSecret: process.env["AUTH_NOTION_SECRET"] || process.env["NOTION_CLIENT_SECRET"],
-      redirectUri: `${process.env["AUTH_URL"] ?? process.env["NEXTAUTH_URL"] ?? 'http://localhost:3000'}/api/auth/callback/notion`,
+      clientId: env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7',
+      clientSecret: env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET,
+      redirectUri: `${env.AUTH_URL ?? env.NEXTAUTH_URL ?? 'http://localhost:3000'}/api/auth/callback/notion`,
       checks: ["state"],
       token: {
         url: "https://api.notion.com/v1/oauth/token",
