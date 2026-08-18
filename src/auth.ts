@@ -10,7 +10,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: true,
   logger: {
     error(code, ...message) {
-      console.error(`[AUTH_ERROR] ${code.name}:`, message, code);
+      console.log(`[AUTH_ERROR_FORCE_INFO] ${code?.name}:`, message, code);
     },
     warn(code, ...message) {
       console.warn(`[AUTH_WARN] ${code}:`, message);
@@ -50,12 +50,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             
             const tokens = await response.json();
             if (!response.ok) {
-              console.error("NOTION TOKEN ERROR DETAILS:", tokens);
+              console.log("[AUTH_ERROR_FORCE_INFO] NOTION TOKEN ERROR DETAILS:", tokens);
               throw new Error("NotionTokenExchangeError");
             }
             return { tokens };
           } catch (e) {
-            console.error("Custom Token Exchange Failed:", e);
+            console.log("[AUTH_ERROR_FORCE_INFO] Custom Token Exchange Failed:", e);
             throw e;
           }
         }
@@ -72,7 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }).then((res) => res.json());
             return profile;
           } catch (e) {
-            console.error("Custom Userinfo Failed:", e);
+            console.log("[AUTH_ERROR_FORCE_INFO] Custom Userinfo Failed:", e);
             throw e;
           }
         }
