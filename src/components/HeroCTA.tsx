@@ -1,12 +1,14 @@
 'use client';
 
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function HeroCTA() {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   if (status === 'loading') {
     return (
@@ -34,7 +36,7 @@ export default function HeroCTA() {
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      onClick={() => signIn('notion', { callbackUrl: '/onboarding' })}
+      onClick={() => router.push('/api/notion/login')}
       id="hero-cta-primary-unauth"
       className="group flex items-center justify-center gap-2 rounded-full bg-primary text-background font-bold text-base px-8 py-4 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300"
     >

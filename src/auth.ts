@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import Notion from 'next-auth/providers/notion';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 const env = process.env as any;
 console.log(`[AUTH_INIT_V2] Auth URL: ${env.AUTH_URL} | Fallback used? ${!env.AUTH_NOTION_ID && !env.NOTION_CLIENT_ID}`);
@@ -20,84 +20,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   trustHost: true,
   basePath: '/api/auth',
-  providers: [
-    {
-      id: "notion",
-      name: "Notion",
-      type: "oauth",
-      clientId: env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7',
-      clientSecret: env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET,
-      authorization: {
-        url: "https://api.notion.com/v1/oauth/authorize",
-        params: { owner: "user" },
+    CredentialsProvider({
+      id: "notion-manual",
+      name: "Notion Manual",
+      credentials: {
+        access_token: { label: "Token", type: "text" },
+        id: { label: "ID", type: "text" },
+        name: { label: "Name", type: "text" },
       },
-      checks: [],
-      token: {
-        url: "https://api.notion.com/v1/oauth/token",
-        async request(context: any) {
-          const { params: { code } } = context;
-          const cid = env.AUTH_NOTION_ID || env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7';
-          const csec = env.AUTH_NOTION_SECRET || env.NOTION_CLIENT_SECRET;
-          
-          console.log(`[AUTH_DIAGNOSTIC] Token Request Triggered. Code: ${code?.substring(0,5)}..., CID length: ${cid?.length}, Secret length: ${csec?.length}`);
-
-          const credentials = btoa(`${cid}:${csec}`);
-          const redirect = `https://careeros-yare.vercel.app/api/auth/callback/notion`;
-          
-          try {
-            const response = await fetch("https://api.notion.com/v1/oauth/token", {
-              method: 'POST',
-              headers: {
-                'Authorization': `Basic ${credentials}`,
-                'Content-Type': 'application/json',
-                'Notion-Version': '2022-06-28',
-              },
-              body: JSON.stringify({
-                grant_type: 'authorization_code',
-                code: code,
-                redirect_uri: redirect,
-              }),
-            });
-            
-            const tokens = await response.json();
-            if (!response.ok) {
-              console.log("[AUTH_ERROR_FORCE_INFO] NOTION TOKEN ERROR DETAILS:", tokens);
-              throw new Error("NotionTokenExchangeError");
-            }
-            return { tokens };
-          } catch (e) {
-            console.log("[AUTH_ERROR_FORCE_INFO] Custom Token Exchange Failed:", e);
-            throw e;
-          }
-        }
-      },
-      userinfo: {
-        url: "https://api.notion.com/v1/users/me",
-        async request(context: any) {
-          try {
-            const profile = await fetch("https://api.notion.com/v1/users/me", {
-              headers: {
-                Authorization: `Bearer ${context.tokens.access_token}`,
-                "Notion-Version": "2022-06-28",
-              },
-            }).then((res) => res.json());
-            return profile;
-          } catch (e) {
-            console.log("[AUTH_ERROR_FORCE_INFO] Custom Userinfo Failed:", e);
-            throw e;
-          }
-        }
-      },
-      profile(profile: any) {
-        const user = profile.bot?.owner?.user;
+      async authorize(credentials) {
+        if (!credentials?.access_token) return null;
         return {
-          id: user?.id || profile.id || "notion-id",
-          name: user?.name || profile.name || "Notion User",
-          email: user?.person?.email || "notion@careeros.local",
-          image: user?.avatar_url || profile.avatar_url || null,
+          id: credentials.id as string,
+          name: credentials.name as string,
+          email: "notion@careeros.local",
+          access_token: credentials.access_token as string,
         };
       }
-    }
+    })
   ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
