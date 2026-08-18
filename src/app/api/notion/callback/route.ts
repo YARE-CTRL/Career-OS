@@ -8,8 +8,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/?error=NoCode", request.url));
   }
 
-  const cid = process.env.AUTH_NOTION_ID || process.env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7';
-  const csec = process.env.AUTH_NOTION_SECRET || process.env.NOTION_CLIENT_SECRET;
+  const cid = (process.env.AUTH_NOTION_ID || process.env.NOTION_CLIENT_ID || '39bd872b-594c-819d-b500-0037842488b7').trim();
+  const csec = (process.env.AUTH_NOTION_SECRET || process.env.NOTION_CLIENT_SECRET || '').trim();
   const redirectUri = `https://careeros-yare.vercel.app/api/notion/callback`;
 
   if (!csec) {
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/?error=MissingSecret", request.url));
   }
 
-  const credentials = btoa(`${cid}:${csec}`);
+  const credentials = Buffer.from(`${cid}:${csec}`).toString('base64');
 
   try {
     // 1. Fetch Tokens
