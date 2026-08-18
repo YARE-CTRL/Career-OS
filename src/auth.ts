@@ -59,6 +59,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw e;
           }
         }
+      },
+      userinfo: {
+        url: "https://api.notion.com/v1/users/me",
+        async request(context: any) {
+          try {
+            const profile = await fetch("https://api.notion.com/v1/users/me", {
+              headers: {
+                Authorization: `Bearer ${context.tokens.access_token}`,
+                "Notion-Version": "2022-06-28",
+              },
+            }).then((res) => res.json());
+            return profile;
+          } catch (e) {
+            console.error("Custom Userinfo Failed:", e);
+            throw e;
+          }
+        }
       }
     }),
   ],
