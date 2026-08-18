@@ -14,7 +14,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       checks: ["state"],
       token: {
         url: "https://api.notion.com/v1/oauth/token",
-        async request(context) {
+        async request(context: any) {
           const { provider, params: { code }, client } = context;
           const credentials = Buffer.from(`${provider.clientId}:${provider.clientSecret}`).toString('base64');
           const response = await fetch(provider.token?.url as string, {
