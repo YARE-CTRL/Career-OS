@@ -57,9 +57,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       // Persistir el access_token de Notion en el JWT
-      if (account?.access_token) {
+      if (user && (user as any).access_token) {
+        token.accessToken = (user as any).access_token;
+      } else if (account?.access_token) {
         token.accessToken = account.access_token;
       }
       return token;
