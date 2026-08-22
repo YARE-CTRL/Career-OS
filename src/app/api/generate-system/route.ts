@@ -12,7 +12,9 @@ interface RoadmapItem {
   type: string;
   status: string;
   duration: string;
+  keyConcepts: string[];
   resources: string[];
+  commonPitfall: string;
   successCriteria: string;
 }
 
@@ -117,10 +119,12 @@ export async function POST(request: Request) {
               type:            { type: SchemaType.STRING },
               status:          { type: SchemaType.STRING },
               duration:        { type: SchemaType.STRING },
+              keyConcepts:     { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
               resources:       { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              commonPitfall:   { type: SchemaType.STRING },
               successCriteria: { type: SchemaType.STRING },
             },
-            required: ['id', 'title', 'description', 'type', 'status', 'duration', 'resources', 'successCriteria'],
+            required: ['id', 'title', 'description', 'type', 'status', 'duration', 'keyConcepts', 'resources', 'commonPitfall', 'successCriteria'],
           },
         },
       },
@@ -142,13 +146,15 @@ PERFIL DEL ESTUDIANTE:
 
 DIRECTRICES DE INGENIERÍA DEL ROADMAP (CUMPLE AL 100%):
 Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
-1. "title": Orientado a resultados técnicos (Ej: 'Dominio de Estado Asíncrono', no 'Aprender React').
-2. "description": El 'QUÉ' y el 'POR QUÉ'. OBLIGATORIO: Incluye al final una "Trampa Común" (Common Pitfall) en la que caen los estudiantes en este tema y cómo evitarla. Adapta tu lenguaje a su nivel (no expliques obviedades a alguien que ya sabe).
-3. "type": Usa estrictamente "course", "project" o "practice". Si es un proyecto, diseña uno que resuelva un problema real de negocio (digno de portafolio), no una calculadora o un To-Do list.
+1. "title": Orientado a resultados técnicos (Ej: 'Dominio de Estado Asíncrono').
+2. "description": El 'QUÉ' y el 'POR QUÉ'. Corto y directo al grano.
+3. "type": Usa estrictamente "course", "project" o "practice". Si es proyecto, que resuelva un problema real de negocio.
 4. "status": Usa "todo".
-5. "duration": Calcula el tiempo exacto basado en sus ${formData.hoursPerWeek}h semanales (Ej: "Semanas 1-3 (Aprox 30h)").
-6. "resources": Enumera 2 a 3 recursos de oro absolutos (Libros de O'Reilly, documentación oficial específica, canales de YT de referentes). PROHIBIDO inventar nombres o ser genérico ("busca en google").
-7. "successCriteria": Un entregable implacable y medible. Nada de "entender X". Debe ser "Desplegar Y en Vercel con un Lighthouse score de 90+" o "Escribir un script que procese Z en menos de 1s".`;
+5. "duration": Calcula el tiempo exacto basado en sus ${formData.hoursPerWeek}h semanales.
+6. "keyConcepts": 3 conceptos fundamentales (bullet points) que aprenderá en esta fase.
+7. "resources": Enumera 2 a 3 recursos de oro absolutos (Libros O'Reilly, docs oficiales, canales YT específicos). PROHIBIDO genéricos.
+8. "commonPitfall": La trampa o error común en la que caen los novatos al aprender este tema y cómo evitarla.
+9. "successCriteria": Un entregable implacable y medible. Nada de "entender X". Debe ser algo accionable (Ej: "Desplegar Y con Lighthouse 90+").`;
 
     let result;
     try {
@@ -197,19 +203,19 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
       ...roadmap.flatMap((item: RoadmapItem) => [
         {
           object: 'block' as const,
-          type: 'heading_3' as const,
-          heading_3: {
+          type: 'heading_2' as const,
+          heading_2: {
             rich_text: [{ type: 'text' as const, text: { content: `[${item.type.toUpperCase()}] ${item.title}` } }],
+            color: 'blue_background' as const,
           },
         },
         {
           object: 'block' as const,
-          type: 'paragraph' as const,
-          paragraph: {
-            rich_text: [
-              { type: 'text' as const, text: { content: '⏱️ Duración: ' }, annotations: { bold: true } },
-              { type: 'text' as const, text: { content: item.duration } },
-            ],
+          type: 'callout' as const,
+          callout: {
+            rich_text: [{ type: 'text' as const, text: { content: item.duration } }],
+            icon: { type: 'emoji' as const, emoji: '⏱️' },
+            color: 'gray_background' as const,
           },
         },
         {
@@ -221,22 +227,53 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
         },
         {
           object: 'block' as const,
+          type: 'paragraph' as const,
+          paragraph: {
+            rich_text: [{ type: 'text' as const, text: { content: '🔑 Conceptos Clave:' }, annotations: { bold: true } }],
+          },
+        },
+        ...item.keyConcepts.map((concept) => ({
+          object: 'block' as const,
           type: 'bulleted_list_item' as const,
           bulleted_list_item: {
+            rich_text: [{ type: 'text' as const, text: { content: concept } }],
+          },
+        })),
+        {
+          object: 'block' as const,
+          type: 'paragraph' as const,
+          paragraph: {
+            rich_text: [{ type: 'text' as const, text: { content: '📚 Recursos Sugeridos:' }, annotations: { bold: true } }],
+          },
+        },
+        ...item.resources.map((resource) => ({
+          object: 'block' as const,
+          type: 'bulleted_list_item' as const,
+          bulleted_list_item: {
+            rich_text: [{ type: 'text' as const, text: { content: resource } }],
+          },
+        })),
+        {
+          object: 'block' as const,
+          type: 'callout' as const,
+          callout: {
             rich_text: [
-              { type: 'text' as const, text: { content: '📚 Recursos: ' }, annotations: { bold: true } },
-              { type: 'text' as const, text: { content: item.resources.join(' • ') } },
+              { type: 'text' as const, text: { content: 'Trampa Común: ' }, annotations: { bold: true } },
+              { type: 'text' as const, text: { content: item.commonPitfall } },
             ],
+            icon: { type: 'emoji' as const, emoji: '⚠️' },
+            color: 'orange_background' as const,
           },
         },
         {
           object: 'block' as const,
-          type: 'quote' as const,
-          quote: {
+          type: 'to_do' as const,
+          to_do: {
             rich_text: [
               { type: 'text' as const, text: { content: '🎯 Criterio de Éxito: ' }, annotations: { bold: true } },
               { type: 'text' as const, text: { content: item.successCriteria } },
             ],
+            checked: false,
           },
         },
         {
