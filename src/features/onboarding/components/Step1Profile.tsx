@@ -89,7 +89,7 @@ export function Step1Profile({ defaultValues, onNext }: Props) {
       {/* Nivel */}
       <motion.div variants={fadeUp} className="flex flex-col gap-2">
         <label className={labelCls}>Nivel actual</label>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {LEVELS.map((lvl) => (
             <button
               key={lvl}
