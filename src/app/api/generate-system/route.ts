@@ -205,7 +205,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
           object: 'block' as const,
           type: 'heading_2' as const,
           heading_2: {
-            rich_text: [{ type: 'text' as const, text: { content: `[${item.type.toUpperCase()}] ${item.title}` } }],
+            rich_text: [{ type: 'text' as const, text: { content: `[${(item.type || 'project').toUpperCase()}] ${item.title || 'Módulo'}` } }],
             color: 'blue_background' as const,
           },
         },
@@ -213,7 +213,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
           object: 'block' as const,
           type: 'callout' as const,
           callout: {
-            rich_text: [{ type: 'text' as const, text: { content: item.duration } }],
+            rich_text: [{ type: 'text' as const, text: { content: item.duration || 'TBD' } }],
             icon: { type: 'emoji' as const, emoji: '⏱️' },
             color: 'gray_background' as const,
           },
@@ -222,7 +222,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
           object: 'block' as const,
           type: 'paragraph' as const,
           paragraph: {
-            rich_text: [{ type: 'text' as const, text: { content: item.description } }],
+            rich_text: [{ type: 'text' as const, text: { content: item.description || '' } }],
           },
         },
         {
@@ -232,7 +232,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
             rich_text: [{ type: 'text' as const, text: { content: '🔑 Conceptos Clave:' }, annotations: { bold: true } }],
           },
         },
-        ...item.keyConcepts.map((concept) => ({
+        ...(item.keyConcepts || []).map((concept) => ({
           object: 'block' as const,
           type: 'bulleted_list_item' as const,
           bulleted_list_item: {
@@ -246,7 +246,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
             rich_text: [{ type: 'text' as const, text: { content: '📚 Recursos Sugeridos:' }, annotations: { bold: true } }],
           },
         },
-        ...item.resources.map((resource) => ({
+        ...(item.resources || []).map((resource) => ({
           object: 'block' as const,
           type: 'bulleted_list_item' as const,
           bulleted_list_item: {
@@ -259,7 +259,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
           callout: {
             rich_text: [
               { type: 'text' as const, text: { content: 'Trampa Común: ' }, annotations: { bold: true } },
-              { type: 'text' as const, text: { content: item.commonPitfall } },
+              { type: 'text' as const, text: { content: item.commonPitfall || 'Ninguna registrada.' } },
             ],
             icon: { type: 'emoji' as const, emoji: '⚠️' },
             color: 'orange_background' as const,
@@ -271,7 +271,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
           to_do: {
             rich_text: [
               { type: 'text' as const, text: { content: '🎯 Criterio de Éxito: ' }, annotations: { bold: true } },
-              { type: 'text' as const, text: { content: item.successCriteria } },
+              { type: 'text' as const, text: { content: item.successCriteria || 'Completar el módulo.' } },
             ],
             checked: false,
           },
