@@ -59,7 +59,7 @@ const getTypeColor = (type: string) => {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { profile, roadmap, notionUrl, clearStore } = useCareerStore();
+  const { profile, roadmap, notionUrl, clearStore, clearRoadmap } = useCareerStore();
   const [isMounted, setIsMounted] = useState(false);
 
   // Avoid hydration errors with zustand persist
@@ -206,19 +206,31 @@ export default function DashboardPage() {
                       Gestiona tu progreso en tu workspace dedicado.
                     </p>
                   </div>
-                  {notionUrl ? (
-                    <a
-                      href={notionUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-full font-semibold text-sm transition-all border border-primary/20"
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    {notionUrl ? (
+                      <a
+                        href={notionUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-full font-semibold text-sm transition-all border border-primary/20"
+                      >
+                        Ver Workspace en Notion
+                        <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                      </a>
+                    ) : (
+                      <span className="text-xs px-3 py-1 bg-text-main/10 rounded-full text-text-main/40 flex items-center h-full">Workspace local</span>
+                    )}
+                    <button
+                      onClick={() => {
+                        clearRoadmap();
+                        router.push('/onboarding');
+                      }}
+                      className="group flex items-center gap-2 bg-secondary/10 hover:bg-secondary/20 text-secondary px-4 py-2 rounded-full font-semibold text-sm transition-all border border-secondary/20"
+                      title="Editar información y generar un nuevo roadmap"
                     >
-                      Ver Workspace en Notion
-                      <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                    </a>
-                  ) : (
-                    <span className="text-xs px-3 py-1 bg-text-main/10 rounded-full text-text-main/40">Workspace local</span>
-                  )}
+                      Editar Perfil
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Stats row */}
@@ -248,12 +260,18 @@ export default function DashboardPage() {
                   Basado en tus habilidades actuales, este es tu camino hacia tu objetivo.
                 </p>
 
-                <div className="flex flex-col gap-4">
+                <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="flex flex-col gap-4"
+                >
                   {roadmap && roadmap.length > 0 ? (
                     roadmap.map((item, index) => (
-                      <div 
+                      <motion.div 
+                        variants={itemVariants}
                         key={item.id || index}
-                        className={`flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border transition-colors hover:border-primary/40 ${getTypeColor(item.type)}`}
+                        className={`flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.015] hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 ${getTypeColor(item.type)}`}
                       >
                         <div className="w-10 h-10 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 shadow-inner">
                           {getTypeIcon(item.type)}
@@ -297,14 +315,14 @@ export default function DashboardPage() {
                             </div>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     ))
                   ) : (
                     <div className="text-center py-8 text-text-main/40 border-2 border-dashed border-text-main/10 rounded-2xl">
                       No se encontró un roadmap.
                     </div>
                   )}
-                </div>
+                </motion.div>
               </motion.div>
 
             </div>
