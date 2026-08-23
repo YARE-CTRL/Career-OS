@@ -297,9 +297,9 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
         paragraph: {
           rich_text: [
             { type: 'text' as const, text: { content: 'Este roadmap es una ' } },
-            { type: 'text' as const, text: { content: 'aproximación estructurada', annotations: { bold: true } } },
+            { type: 'text' as const, text: { content: 'aproximación estructurada' }, annotations: { bold: true } },
             { type: 'text' as const, text: { content: ' generada por Inteligencia Artificial basada en la información que proporcionaste. ' } },
-            { type: 'text' as const, text: { content: 'No debe tomarse de manera literal o como una verdad absoluta.', annotations: { italic: true } } }
+            { type: 'text' as const, text: { content: 'No debe tomarse de manera literal o como una verdad absoluta.' }, annotations: { italic: true } }
           ],
         },
       },
@@ -309,7 +309,7 @@ Crea de 4 a 6 fases cronológicas. Por cada fase, genera un objeto JSON con:
         paragraph: {
           rich_text: [
             { type: 'text' as const, text: { content: 'Te recomendamos fuertemente utilizar este documento como una guía inicial y apoyarte en directivos, profesores, colegas de tu carrera o compañeros de trabajo. ' } },
-            { type: 'text' as const, text: { content: 'Siempre es aconsejable consultar con un profesional experimentado en tu área.', annotations: { bold: true, underline: true } } }
+            { type: 'text' as const, text: { content: 'Siempre es aconsejable consultar con un profesional experimentado en tu área.' }, annotations: { bold: true, underline: true } }
           ],
         },
       }
