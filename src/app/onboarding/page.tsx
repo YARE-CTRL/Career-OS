@@ -75,7 +75,7 @@ const DEFAULT_STEP3: Step3Data = { technologies: [], courses: [], projects: [] }
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { roadmap, clearStore } = useCareerStore();
+  const { roadmap, profile, clearStore, clearRoadmap } = useCareerStore();
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -88,11 +88,29 @@ export default function OnboardingPage() {
     }
   }, [roadmap]);
 
+  // Prevenir pérdida de datos si el usuario intenta cerrar la pestaña a mitad del formulario
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (step > 1 && step < 4) {
+        e.preventDefault();
+        e.returnValue = ''; // Requerido para navegadores modernos
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [step]);
+
   // RHF owns state while typing. Zustand receives validated data on submit.
   // We keep minimal local copies here only to pre-fill if user goes back.
-  const [step1Data, setStep1Data] = useState<Step1Data>(DEFAULT_STEP1);
-  const [step2Data, setStep2Data] = useState<Step2Data>(DEFAULT_STEP2);
-  const [step3Data, setStep3Data] = useState<Step3Data>(DEFAULT_STEP3);
+  const [step1Data, setStep1Data] = useState<Step1Data>(
+    profile ? { name: profile.name, role: profile.role, level: profile.level } : DEFAULT_STEP1
+  );
+  const [step2Data, setStep2Data] = useState<Step2Data>(
+    profile ? { goal: profile.goal, sector: profile.sector, hoursPerWeek: profile.hoursPerWeek } : DEFAULT_STEP2
+  );
+  const [step3Data, setStep3Data] = useState<Step3Data>(
+    profile ? { technologies: profile.technologies, courses: profile.courses, projects: profile.projects } : DEFAULT_STEP3
+  );
 
   const goNext = () => {
     setDirection(1);
@@ -147,8 +165,23 @@ export default function OnboardingPage() {
           </button>
           <button
             onClick={() => {
+              clearRoadmap();
+              setHasExistingRoadmap(false);
+              setStep(1);
+            }}
+            className="px-6 py-3 rounded-full bg-secondary/10 text-secondary font-bold text-sm hover:bg-secondary/20 transition-all"
+          >
+            Editar mi Perfil
+          </button>
+          <button
+            onClick={() => {
               clearStore();
               setHasExistingRoadmap(false);
+              // Reset local state to empty
+              setStep1Data(DEFAULT_STEP1);
+              setStep2Data(DEFAULT_STEP2);
+              setStep3Data(DEFAULT_STEP3);
+              setStep(1);
             }}
             className="px-6 py-3 rounded-full bg-white/10 border border-white/15 text-text-main/70 font-semibold text-sm hover:bg-white/15 transition-all"
           >

@@ -45,6 +45,7 @@ export interface CareerStore {
   setProfile: (profile: UserProfile) => void;
   setSystemData: (roadmap: RoadmapItem[], notionUrl: string) => void;
   clearStore: () => void;
+  clearRoadmap: () => void;
 
   // ── Acciones de páginas de Notion ───────────────────────────────────────────
   setSelectedPageId: (id: string) => void;
@@ -77,6 +78,11 @@ export const useCareerStore = create<CareerStore>()(
           notionUrl: null,
           notionPages: [],
           selectedPageId: null,
+        }),
+      clearRoadmap: () =>
+        set({
+          roadmap: [],
+          notionUrl: null,
         }),
 
       // ── Páginas de Notion ─────────────────────────────────────────────────

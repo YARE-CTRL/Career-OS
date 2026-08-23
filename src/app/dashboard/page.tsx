@@ -76,8 +76,52 @@ export default function DashboardPage() {
 
   if (!isMounted || !profile) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <div className="min-h-screen bg-background text-text-main pb-24 relative animate-pulse">
+        {/* Header Skeleton */}
+        <header className="sticky top-0 z-40 bg-background/80 border-b border-text-main/10 px-6 py-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="w-32 h-6 bg-surface rounded-md" />
+            <div className="w-24 h-6 bg-surface rounded-full hidden sm:block" />
+          </div>
+        </header>
+
+        <main className="max-w-6xl mx-auto px-6 pt-10">
+          <div className="flex flex-col gap-8">
+            {/* Greeting Skeleton */}
+            <div className="flex flex-col gap-3">
+              <div className="w-64 sm:w-96 h-10 bg-surface rounded-xl" />
+              <div className="w-48 sm:w-72 h-6 bg-surface rounded-md" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column Skeletons */}
+              <div className="lg:col-span-2 flex flex-col gap-6">
+                <div className="h-40 bg-surface rounded-3xl border border-text-main/5" />
+                <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-text-main/5">
+                  <div className="w-48 h-8 bg-background/50 rounded-lg mb-6" />
+                  <div className="flex flex-col gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex gap-4 p-4 rounded-2xl border border-text-main/5">
+                        <div className="w-10 h-10 rounded-full bg-background/50 flex-shrink-0" />
+                        <div className="flex-1 flex flex-col gap-2">
+                          <div className="w-3/4 h-5 bg-background/50 rounded-md" />
+                          <div className="w-full h-4 bg-background/50 rounded-md" />
+                          <div className="w-2/3 h-4 bg-background/50 rounded-md" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column Skeletons */}
+              <div className="flex flex-col gap-6">
+                <div className="h-64 bg-surface rounded-3xl border border-text-main/5" />
+                <div className="h-32 bg-surface rounded-3xl border border-text-main/5" />
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
