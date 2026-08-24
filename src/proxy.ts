@@ -13,8 +13,8 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   
   ratelimit = new Ratelimit({
     redis,
-    // Límite permisivo para pruebas de UI y Chaos Mode
-    limiter: Ratelimit.slidingWindow(100, '12 h'),
+    // Límite estricto para producción (3 peticiones por 12 horas)
+    limiter: Ratelimit.slidingWindow(3, '12 h'),
     analytics: true,
   });
 }

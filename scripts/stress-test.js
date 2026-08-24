@@ -23,7 +23,8 @@ async function runStressTest() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-forwarded-for': `192.168.1.99` 
+          // Usamos una IP completamente nueva para evitar el bucket cacheado de Upstash (100)
+          'x-forwarded-for': `192.168.99.99` 
         },
         body: JSON.stringify({
           name: "Hacker",

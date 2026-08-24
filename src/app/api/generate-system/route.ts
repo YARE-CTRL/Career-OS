@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { Client } from '@notionhq/client';
 import { auth } from '@/auth';
+import { onboardingSchema } from '@/features/onboarding/schemas/onboardingSchema';
 
 // ─── Tipos internos ────────────────────────────────────────────────────────────
 
@@ -43,11 +44,21 @@ export async function POST(request: Request) {
     // Inicializamos el cliente de Notion con el token OAuth del usuario
     const notion = new Client({ auth: session.accessToken });
 
-    // 2. Extraer datos del usuario
-    const formData = await request.json();
+    // 2. Extraer y validar datos del usuario
+    const rawData = await request.json();
+    const parseResult = onboardingSchema.safeParse(rawData);
 
-    // Validar que el frontend envió un parent_id seleccionado por el usuario
-    const parentPageId: string | undefined = formData.parent_id;
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: 'Datos de formulario inválidos o extremos. Revisa los campos y límites.' },
+        { status: 400 }
+      );
+    }
+    
+    const formData = parseResult.data;
+
+    // Validar que el frontend envió un parent_id seleccionado por el usuario (viene en rawData, Zod lo ignora)
+    const parentPageId: string | undefined = rawData.parent_id;
     if (!parentPageId) {
       return NextResponse.json(
         { error: 'parent_id requerido. Selecciona una página de Notion antes de generar.' },
