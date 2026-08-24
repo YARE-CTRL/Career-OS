@@ -3,48 +3,104 @@ import { NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
-// Inicializar el Rate Limiter (solo se ejecuta si hay credenciales para evitar errores locales)
-let ratelimit: Ratelimit | null = null;
+// ─── Inicializar Redis (solo si hay credenciales configuradas) ─────────────────
+
+let redis: Redis | null = null;
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-  const redis = new Redis({
+  redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
     token: process.env.UPSTASH_REDIS_REST_TOKEN,
   });
-  
-  ratelimit = new Ratelimit({
-    redis,
-    // Límite estricto para producción (3 peticiones por 12 horas)
-    limiter: Ratelimit.slidingWindow(3, '12 h'),
+}
+
+/**
+ * Crea un rate limiter con límite fijo mensual.
+ * Free: 3 generaciones por mes.
+ * Pro: 999 generaciones por mes (efectivamente ilimitado).
+ */
+function createLimiter(max: number): Ratelimit {
+  return new Ratelimit({
+    redis: redis!,
+    limiter: Ratelimit.fixedWindow(max, '30 d'),
     analytics: true,
   });
 }
 
+// ─── Límites por tipo de identificador ────────────────────────────────────────
+const FREE_LIMIT = 3;
+
+// ─── Proxy (Next.js Middleware) ───────────────────────────────────────────────
+
 export const proxy = auth(async (req) => {
   const pathname = req.nextUrl.pathname;
 
-  // ─── RATE LIMITING PARA GENERAR ROADMAP ───
+  // ─── RATE LIMITING ANTI-ABUSO — Triple barrera ────────────────────────────
   if (pathname === '/api/generate-system' && req.method === 'POST') {
-    if (ratelimit) {
-      // Usar el ID del usuario (o IP de los headers como fallback) para identificarlo
-      const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'anonymous';
-      const identifier = req.auth?.user?.id || ip;
-      const { success, limit, reset, remaining } = await ratelimit.limit(identifier);
-      
-      console.log(`[Rate Limit] User ${identifier} | Remaining: ${remaining}/${limit}`);
-      
-      if (!success) {
+    if (redis) {
+      // 1. Identificar las 3 dimensiones de rate limit
+      const ip =
+        req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+        req.headers.get('x-real-ip') ||
+        'anonymous';
+      const userId = req.auth?.user?.id || `anon-${ip}`;
+      const fingerprint = req.headers.get('x-fp-id') || `no-fp-${ip}`;
+
+      // 2. Comprobar si el usuario es Pro (clave: pro:{userId} en Redis)
+      let isPro = false;
+      try {
+        const proStatus = await redis.get<string>(`pro:${userId}`);
+        isPro = proStatus === 'active' || proStatus === 'lifetime';
+      } catch {
+        // Si Redis falla en la consulta Pro, continuar como Free (fail-safe)
+        isPro = false;
+      }
+
+      const limit = isPro ? 999 : FREE_LIMIT;
+      const limiter = createLimiter(limit);
+
+      // 3. Ejecutar las 3 comprobaciones en paralelo (máxima eficiencia)
+      const [byUser, byIp, byFingerprint] = await Promise.all([
+        limiter.limit(`user:${userId}`),
+        limiter.limit(`ip:${ip}`),
+        limiter.limit(`fp:${fingerprint}`),
+      ]);
+
+      // El menor de los 3 "remaining" es el que mostramos al usuario
+      const minRemaining = Math.min(
+        byUser.remaining,
+        byIp.remaining,
+        byFingerprint.remaining
+      );
+
+      console.log(
+        `[Rate Limit] user:${userId.slice(0, 8)}… | ip:${ip} | fp:${fingerprint.slice(0, 8)}… | remaining:${minRemaining}/${limit} | isPro:${isPro}`
+      );
+
+      // 4. Si cualquiera de los 3 límites se agota → bloquear
+      if (!byUser.success || !byIp.success || !byFingerprint.success) {
         return NextResponse.json(
-          { error: 'Has alcanzado el límite de 3 roadmaps cada 12 horas. Intenta más tarde.' },
-          { 
-            status: 429, 
-            headers: { 
+          {
+            error: isPro
+              ? 'Has alcanzado el límite de generaciones de tu plan. Contacta soporte.'
+              : 'Has alcanzado el límite gratuito de 3 roadmaps al mes. Desbloquea el Plan Pro para generar ilimitado.',
+          },
+          {
+            status: 429,
+            headers: {
               'X-RateLimit-Limit': limit.toString(),
-              'X-RateLimit-Remaining': remaining.toString(),
-              'X-RateLimit-Reset': reset.toString()
-            } 
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': byUser.reset.toString(),
+            },
           }
         );
       }
+
+      // 5. Pasar la petición al handler con el contador actualizado en los headers
+      const response = NextResponse.next();
+      response.headers.set('X-RateLimit-Limit', limit.toString());
+      response.headers.set('X-RateLimit-Remaining', minRemaining.toString());
+      response.headers.set('X-RateLimit-Reset', byUser.reset.toString());
+      return response;
     }
   }
 

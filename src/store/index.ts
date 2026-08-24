@@ -41,6 +41,10 @@ export interface CareerStore {
   selectedPageId: string | null;
   loadingPages: boolean;
 
+  // ── Estado Premium ──────────────────────────────────────────────────────────
+  remainingGenerations: number | null; // null = desconocido (aún no ha generado)
+  isPro: boolean;
+
   // ── Acciones de perfil / resultado ─────────────────────────────────────────
   setProfile: (profile: UserProfile) => void;
   setSystemData: (roadmap: RoadmapItem[], notionUrl: string) => void;
@@ -67,6 +71,8 @@ export const useCareerStore = create<CareerStore>()(
       notionPages: [],
       selectedPageId: null,
       loadingPages: false,
+      remainingGenerations: null,
+      isPro: false,
 
       // ── Perfil / resultado ────────────────────────────────────────────────
       setProfile: (profile) => set({ profile }),
@@ -78,6 +84,8 @@ export const useCareerStore = create<CareerStore>()(
           notionUrl: null,
           notionPages: [],
           selectedPageId: null,
+          remainingGenerations: null,
+          isPro: false,
         }),
       clearRoadmap: () =>
         set({
@@ -118,15 +126,38 @@ export const useCareerStore = create<CareerStore>()(
           );
         }
 
+        // ── Anti-Abuso: obtener huella digital del dispositivo ─────────────
+        // Solo disponible en el navegador (client-side)
+        let visitorId = 'server';
+        if (typeof window !== 'undefined') {
+          try {
+            const { getVisitorId } = await import('@/lib/fingerprint');
+            visitorId = await getVisitorId();
+          } catch {
+            visitorId = 'fp-error';
+          }
+        }
+
         const res = await fetch('/api/generate-system', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-fp-id': visitorId, // Huella digital para rate limit triple
+          },
           body: JSON.stringify({ ...formData, parent_id: selectedPageId }),
         });
+
+        // ── Leer el contador de generaciones restantes ─────────────────────
+        const remaining = res.headers.get('X-RateLimit-Remaining');
+        if (remaining !== null) {
+          set({ remainingGenerations: parseInt(remaining, 10) });
+        }
 
         const data = await res.json();
 
         if (res.status === 429) {
+          // Asegurarse de reflejar 0 generaciones en el store al bloquearse
+          set({ remainingGenerations: 0 });
           throw Object.assign(new Error(data.error), { status: 429 });
         }
 
@@ -145,6 +176,8 @@ export const useCareerStore = create<CareerStore>()(
         roadmap: state.roadmap,
         notionUrl: state.notionUrl,
         selectedPageId: state.selectedPageId,
+        remainingGenerations: state.remainingGenerations,
+        isPro: state.isPro,
       }),
     }
   )
