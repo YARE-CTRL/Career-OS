@@ -3,6 +3,28 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { Client } from '@notionhq/client';
 import { auth } from '@/auth';
 import { onboardingSchema } from '@/features/onboarding/schemas/onboardingSchema';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+import { checkProStatus } from '@/lib/subscription';
+
+// ─── Redis (solo si hay credenciales configuradas) ─────────────────────────────
+let redis: Redis | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
+
+const FREE_LIMIT = 3;
+
+function createLimiter(max: number) {
+  return new Ratelimit({
+    redis: redis!,
+    limiter: Ratelimit.fixedWindow(max, '30 d'),
+    analytics: true,
+  });
+}
 
 // ─── Tipos internos ────────────────────────────────────────────────────────────
 
@@ -30,6 +52,59 @@ export async function POST(request: Request) {
         { error: 'No autorizado. Debes iniciar sesión con Notion primero.' },
         { status: 401 }
       );
+    }
+
+    // 2. Rate Limiting Anti-Abuso — corre en Node.js con sesión real del usuario
+    if (redis) {
+      try {
+        const ip =
+          request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+          request.headers.get('x-real-ip') ||
+          'anonymous';
+        const userId = session.user?.id || session.user?.email || `anon-${ip}`;
+        const fingerprint = request.headers.get('x-fp-id') || `no-fp-${ip}`;
+
+        const isPro = await checkProStatus(userId);
+        const limit = isPro ? 999 : FREE_LIMIT;
+        const limiter = createLimiter(limit);
+
+        const [byUser, byIp, byFingerprint] = await Promise.all([
+          limiter.limit(`user:${userId}`),
+          limiter.limit(`ip:${ip}`),
+          limiter.limit(`fp:${fingerprint}`),
+        ]);
+
+        const minRemaining = Math.min(
+          byUser.remaining,
+          byIp.remaining,
+          byFingerprint.remaining
+        );
+
+        console.log(
+          `[Rate Limit] user:${userId.slice(0, 8)}… | ip:${ip} | fp:${fingerprint.slice(0, 8)}… | remaining:${minRemaining}/${limit} | isPro:${isPro}`
+        );
+
+        if (!byUser.success || !byIp.success || !byFingerprint.success) {
+          return NextResponse.json(
+            {
+              error: isPro
+                ? 'Has alcanzado el límite de generaciones de tu plan. Contacta soporte.'
+                : 'Has alcanzado el límite gratuito de 3 roadmaps al mes. Desbloquea el Plan Pro para generar ilimitado.',
+            },
+            {
+              status: 429,
+              headers: {
+                'X-RateLimit-Limit': limit.toString(),
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': String(byUser.reset),
+              },
+            }
+          );
+        }
+      } catch (rateLimitError) {
+        // Si el rate limit falla por cualquier razón, dejamos pasar la petición (fail-open)
+        console.error('[Rate Limit] Error al ejecutar rate limit, permitiendo petición:', rateLimitError);
+      }
     }
 
     const geminiApiKey = process.env.GEMINI_API_KEY;

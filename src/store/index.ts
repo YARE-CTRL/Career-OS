@@ -118,7 +118,15 @@ export const useCareerStore = create<CareerStore>()(
 
       // ── Generación de Roadmap ─────────────────────────────────────────────
       generateRoadmap: async (formData: UserProfile) => {
-        const { selectedPageId } = get();
+        const { selectedPageId, remainingGenerations, isPro } = get();
+
+        // ── Guarda client-side: si ya sabemos que el cupo es 0, no hacemos fetch ──
+        if (!isPro && remainingGenerations === 0) {
+          throw Object.assign(
+            new Error('Has alcanzado el límite gratuito de 3 roadmaps al mes. Desbloquea el Plan Pro para generar ilimitado.'),
+            { status: 429 }
+          );
+        }
 
         if (!selectedPageId) {
           throw new Error(

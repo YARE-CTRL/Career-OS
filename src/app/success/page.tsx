@@ -18,6 +18,25 @@ function SuccessContent() {
   const sessionId = searchParams.get("session_id");
   const { isPro } = useCareerStore();
 
+  // Al cargar la página de éxito, sincronizamos el estado Pro con el servidor
+  useEffect(() => {
+    const syncProStatus = async () => {
+      try {
+        const res = await fetch('/api/me/pro-status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.isPro) {
+            // Actualizar el store de Zustand para reflejar el estado Pro
+            useCareerStore.setState({ isPro: true, remainingGenerations: null });
+          }
+        }
+      } catch (err) {
+        console.error('[Success] Error syncing pro status:', err);
+      }
+    };
+    syncProStatus();
+  }, []);
+
   // Detectar plan desde el sessionId (Stripe pasa parámetros extra) o default a "annual"
   const [plan] = useState<string>("annual");
   const planInfo = PLAN_INFO[plan] ?? PLAN_INFO.annual;
