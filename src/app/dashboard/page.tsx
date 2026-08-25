@@ -19,7 +19,10 @@ import {
   Sparkles,
   ArrowRight,
   LogOut,
-  Zap
+  Zap,
+  FileSpreadsheet,
+  CalendarDays,
+  Download,
 } from "lucide-react";
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -65,6 +68,70 @@ export default function DashboardPage() {
   const { profile, roadmap, notionUrl, clearStore, clearRoadmap, remainingGenerations, isPro } = useCareerStore();
   const [isMounted, setIsMounted] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [exportingSheets, setExportingSheets] = useState(false);
+  const [exportingCalendar, setExportingCalendar] = useState(false);
+
+  // Exportar roadmap a Google Sheets (descarga CSV + abre Sheets)
+  const handleExportSheets = async () => {
+    if (!roadmap?.length) return;
+    setExportingSheets(true);
+    try {
+      const res = await fetch('/api/export/sheets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roadmap, profile }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // 1. Descargar el CSV
+      const blob = new Blob(['\uFEFF' + data.csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = data.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      // 2. Abrir Google Sheets para que el usuario importe el CSV descargado
+      setTimeout(() => window.open(data.sheetsUrl, '_blank'), 800);
+    } catch (err: any) {
+      console.error('[Dashboard] Error exportando a Sheets:', err);
+      alert('Error al exportar: ' + (err?.message || 'Intenta de nuevo.'));
+    } finally {
+      setExportingSheets(false);
+    }
+  };
+
+  // Exportar roadmap a Google Calendar (.ics)
+  const handleExportCalendar = async () => {
+    if (!roadmap?.length) return;
+    setExportingCalendar(true);
+    try {
+      const res = await fetch('/api/export/calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roadmap, profile }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'career-os-roadmap.ics';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('[Dashboard] Error exportando a Calendar:', err);
+      alert('Error al exportar: ' + (err?.message || 'Intenta de nuevo.'));
+    } finally {
+      setExportingCalendar(false);
+    }
+  };
 
   // Avoid hydration errors with zustand persist
   useEffect(() => {
@@ -399,6 +466,48 @@ export default function DashboardPage() {
                   )}
                 </div>
               </motion.div>
+
+              {/* ─── Exportaciones Premium (solo Pro) ─────────────────────── */}
+              {isPro && roadmap && roadmap.length > 0 && (
+                <motion.div variants={itemVariants} className="bg-surface rounded-3xl p-6 border border-primary/20 shadow-lg shadow-primary/5">
+                  <h2 className="text-base font-bold flex items-center gap-2 text-white mb-1">
+                    <Download size={18} className="text-primary" />
+                    Exportar Roadmap
+                    <span className="ml-auto text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">PRO</span>
+                  </h2>
+                  <p className="text-text-main/40 text-xs mb-4">
+                    Lleva tu plan a tus herramientas favoritas.
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleExportSheets}
+                      disabled={exportingSheets}
+                      className="group flex items-center gap-3 w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 px-4 py-3 rounded-2xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FileSpreadsheet size={18} className="flex-shrink-0" />
+                      <span className="flex-1 text-left">
+                        {exportingSheets ? 'Generando...' : 'Exportar a Google Sheets'}
+                      </span>
+                      <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform opacity-60" />
+                    </button>
+                    <button
+                      onClick={handleExportCalendar}
+                      disabled={exportingCalendar}
+                      className="group flex items-center gap-3 w-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 px-4 py-3 rounded-2xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <CalendarDays size={18} className="flex-shrink-0" />
+                      <span className="flex-1 text-left">
+                        {exportingCalendar ? 'Generando...' : 'Exportar a Google Calendar'}
+                      </span>
+                      <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform opacity-60" />
+                    </button>
+                  </div>
+                  <p className="text-text-main/30 text-[10px] mt-3 leading-relaxed">
+                    Sheets: descarga el CSV e impórtalo en Google Sheets.<br/>
+                    Calendar: abre el .ics para añadirlo a tu agenda.
+                  </p>
+                </motion.div>
+              )}
 
             </div>
           </div>
