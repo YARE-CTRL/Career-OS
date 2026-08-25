@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { grantProAccess, revokeProAccess, type PlanType } from '@/lib/subscription';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
+  apiVersion: '2026-07-29.dahlia',
 });
 
 const PRICE_TO_PLAN: Record<string, PlanType> = {

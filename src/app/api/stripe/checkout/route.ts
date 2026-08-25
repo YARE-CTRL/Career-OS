@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { auth } from '@/auth';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
+  apiVersion: '2026-07-29.dahlia',
 });
 
 const PLAN_CONFIG: Record<string, { priceId: string; mode: Stripe.Checkout.SessionCreateParams.Mode }> = {
