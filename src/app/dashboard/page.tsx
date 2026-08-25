@@ -6,6 +6,8 @@ import { signOut } from "next-auth/react";
 import { motion, type Variants } from "framer-motion";
 import Image from "next/image";
 import { useCareerStore } from "@/store";
+import { GenerationsCounter } from "@/components/GenerationsCounter";
+import { PricingModal } from "@/components/PricingModal";
 import {
   Brain,
   BookOpen,
@@ -17,6 +19,7 @@ import {
   Sparkles,
   ArrowRight,
   LogOut,
+  Zap
 } from "lucide-react";
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -59,8 +62,9 @@ const getTypeColor = (type: string) => {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { profile, roadmap, notionUrl, clearStore, clearRoadmap } = useCareerStore();
+  const { profile, roadmap, notionUrl, clearStore, clearRoadmap, remainingGenerations, isPro } = useCareerStore();
   const [isMounted, setIsMounted] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
   // Avoid hydration errors with zustand persist
   useEffect(() => {
@@ -158,6 +162,11 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            {isPro && (
+              <span className="flex items-center gap-1.5 text-xs font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/20">
+                <Zap size={14} className="fill-primary" /> PRO
+              </span>
+            )}
             <span className="text-sm font-semibold bg-surface px-3 py-1.5 rounded-full border border-text-main/10 hidden sm:inline-block">
               Nivel: <span className="text-primary">{profile.level}</span>
             </span>
@@ -222,8 +231,12 @@ export default function DashboardPage() {
                     )}
                     <button
                       onClick={() => {
-                        clearRoadmap();
-                        router.push('/onboarding');
+                        if (remainingGenerations === 0 && !isPro) {
+                          setIsPricingModalOpen(true);
+                        } else {
+                          clearRoadmap();
+                          router.push('/onboarding');
+                        }
                       }}
                       className="group flex items-center gap-2 bg-secondary/10 hover:bg-secondary/20 text-secondary px-4 py-2 rounded-full font-semibold text-sm transition-all border border-secondary/20"
                       title="Editar información y generar un nuevo roadmap"
@@ -329,6 +342,11 @@ export default function DashboardPage() {
 
             {/* ─── Right Column (Copilot & Actions) ──────────────────────── */}
             <div className="flex flex-col gap-6">
+
+              {/* Generations Counter */}
+              <motion.div variants={itemVariants}>
+                <GenerationsCounter onUpgradeClick={() => setIsPricingModalOpen(true)} />
+              </motion.div>
               
               {/* IA Copilot Box */}
               <motion.div variants={itemVariants} className="relative bg-secondary overflow-hidden rounded-3xl p-6 sm:p-8 border border-secondary/50 shadow-xl shadow-secondary/10">
@@ -386,6 +404,11 @@ export default function DashboardPage() {
           </div>
         </motion.div>
       </main>
+      
+      <PricingModal 
+        isOpen={isPricingModalOpen} 
+        onClose={() => setIsPricingModalOpen(false)} 
+      />
     </div>
   );
 }

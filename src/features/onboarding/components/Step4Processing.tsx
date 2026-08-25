@@ -103,27 +103,35 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
         animate="visible"
         className="flex flex-col items-center gap-6 py-6 text-center"
       >
-        <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center">
-          <AlertCircle size={32} className="text-amber-400" />
+        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+          <AlertCircle size={32} className="text-primary" />
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-xl font-black text-white tracking-tight">
-            Límite temporal alcanzado
+          <h2 className="text-2xl font-black text-white tracking-tight">
+            Límite Alcanzado
           </h2>
-          <p className="text-white/60 text-sm max-w-sm">{error}</p>
-          <p className="text-white/30 text-xs mt-1">
-            El plan gratuito de Gemini tiene un límite de llamadas por minuto.
+          <p className="text-white/70 text-sm max-w-sm mb-2">
+            Has agotado tus generaciones gratuitas de este mes.
+          </p>
+          <p className="text-primary font-semibold text-sm">
+            Para continuar, debes actualizar tu plan.
           </p>
         </div>
-        <button
-          onClick={() => {
-            setIsQuotaError(false);
-            setError(null);
-          }}
-          className="mt-2 px-6 py-3 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-semibold hover:bg-amber-500/30 transition-all"
-        >
-          Intentar de nuevo
-        </button>
+        
+        <div className="flex flex-col w-full gap-3 mt-4">
+          <Link
+            href="/dashboard"
+            className="w-full flex items-center justify-center bg-gradient-to-r from-primary to-secondary text-white font-bold py-3.5 rounded-2xl transition-all hover:scale-[1.02] active:scale-100 border border-primary/20 shadow-lg shadow-primary/10"
+          >
+            Ir al Dashboard y actualizar plan
+          </Link>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full py-3 text-text-main/50 text-sm font-semibold hover:text-text-main transition-colors"
+          >
+            Volver al inicio
+          </button>
+        </div>
       </motion.div>
     );
   }
