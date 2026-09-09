@@ -1,6 +1,22 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { checkProStatus } from '@/lib/subscription';
+import { z } from 'zod';
+
+const RoadmapItemSchema = z.object({
+  title: z.string().max(500),
+  type: z.string().optional(),
+  duration: z.string().optional(),
+  description: z.string().optional(),
+  resources: z.array(z.string()).optional(),
+  successCriteria: z.string().optional(),
+  status: z.string().optional(),
+});
+
+const ExportBodySchema = z.object({
+  roadmap: z.array(RoadmapItemSchema).min(1).max(50),
+  profile: z.object({ name: z.string().optional() }).optional(),
+});
 
 // Formatear fecha para iCalendar (YYYYMMDD)
 function formatICSDate(date: Date): string {
@@ -49,10 +65,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Esta función requiere Plan Pro.' }, { status: 403 });
     }
 
-    const { roadmap, profile } = await request.json();
-    if (!roadmap || roadmap.length === 0) {
-      return NextResponse.json({ error: 'No hay roadmap para exportar.' }, { status: 400 });
+    const body = await request.json();
+    const parsed = ExportBodySchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Payload inválido.' }, { status: 400 });
     }
+    const { roadmap, profile } = parsed.data;
 
     const calendarName = escapeICS(`Career OS Roadmap - ${profile?.name || 'Mi Plan'}`);
     const now = new Date();

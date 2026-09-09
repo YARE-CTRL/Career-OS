@@ -18,11 +18,14 @@ function SuccessContent() {
   const sessionId = searchParams.get("session_id");
   const { isPro } = useCareerStore();
 
-  // Al cargar la página de éxito, sincronizamos el estado Pro con el servidor
+  // Al cargar la página de éxito, sincronizamos el estado Pro con el servidor (reconciliación activa con Stripe)
   useEffect(() => {
     const syncProStatus = async () => {
       try {
-        const res = await fetch('/api/me/pro-status');
+        const url = sessionId
+          ? `/api/me/pro-status?session_id=${encodeURIComponent(sessionId)}`
+          : '/api/me/pro-status';
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           if (data.isPro) {
@@ -35,7 +38,7 @@ function SuccessContent() {
       }
     };
     syncProStatus();
-  }, []);
+  }, [sessionId]);
 
   // Detectar plan desde el sessionId (Stripe pasa parámetros extra) o default a "annual"
   const [plan] = useState<string>("annual");

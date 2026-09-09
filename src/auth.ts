@@ -55,12 +55,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token?.accessToken) {
         session.accessToken = token.accessToken as string;
       }
+      // Asegurar que el ID de usuario viaje siempre en la sesión (evita fallback a undefined)
+      if (token?.sub && session.user) {
+        session.user.id = token.sub;
+      }
       return session;
     },
     async jwt({ token, account, user }) {
-      // Persistir el access_token de Notion en el JWT
-      if (user && (user as any).access_token) {
-        token.accessToken = (user as any).access_token;
+      // Persistir el access_token y el id de Notion en el JWT
+      if (user) {
+        if ((user as any).access_token) {
+          token.accessToken = (user as any).access_token;
+        }
+        if (user.id) {
+          token.sub = user.id;
+        }
       } else if (account?.access_token) {
         token.accessToken = account.access_token;
       }

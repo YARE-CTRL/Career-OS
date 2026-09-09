@@ -178,20 +178,21 @@ export const useCareerStore = create<CareerStore>()(
     }),
     {
       name: 'career-os-storage',
-      // No persistir estados transitorios ni páginas (se recargan en cada sesión)
+      // FIX SEGURIDAD: isPro NO se persiste en localStorage.
+      // remainingGenerations SÍ se persiste para mostrar el contador sin fetch extra.
       partialize: (state) => ({
         profile: state.profile,
         roadmap: state.roadmap,
         notionUrl: state.notionUrl,
         selectedPageId: state.selectedPageId,
         remainingGenerations: state.remainingGenerations,
-        isPro: state.isPro,
+        // isPro: ELIMINADO — siempre se obtiene del servidor al montar el Dashboard
       }),
     }
   )
 );
 
-// Exponer el store en la consola del navegador para inyección de pruebas (Stress Testing)
-if (typeof window !== 'undefined') {
+// FIX SEGURIDAD: window.__STORE__ solo disponible en desarrollo local.
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   (window as any).__STORE__ = useCareerStore;
 }

@@ -138,6 +138,26 @@ export default function DashboardPage() {
     setIsMounted(true);
   }, []);
 
+  // FIX SEGURIDAD: isPro ya no viene de localStorage.
+  // Lo consultamos al servidor al montar el Dashboard para evitar:
+  // 1. Desincronización multi-dispositivo
+  // 2. Bypass de UI desde la consola del navegador
+  useEffect(() => {
+    if (!isMounted) return;
+    const syncPro = async () => {
+      try {
+        const res = await fetch('/api/me/pro-status');
+        if (res.ok) {
+          const data = await res.json();
+          useCareerStore.setState({ isPro: !!data.isPro });
+        }
+      } catch {
+        // Fail-safe: si el servidor no responde, la UI permanece en isPro: false
+      }
+    };
+    syncPro();
+  }, [isMounted]);
+
   // Handle Empty State / Redirection
   useEffect(() => {
     if (isMounted && !profile) {
