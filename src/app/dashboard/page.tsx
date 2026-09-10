@@ -70,6 +70,11 @@ export default function DashboardPage() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [exportingSheets, setExportingSheets] = useState(false);
   const [exportingCalendar, setExportingCalendar] = useState(false);
+  
+  // Copiloto IA State
+  const [advice, setAdvice] = useState<string | null>(null);
+  const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const [adviceError, setAdviceError] = useState<string | null>(null);
 
   // Exportar roadmap a Google Sheets (descarga CSV + abre Sheets)
   const handleExportSheets = async () => {
@@ -219,6 +224,27 @@ export default function DashboardPage() {
 
   // AI Copilot Logic: find the first 'todo' task or default
   const nextTask = roadmap?.find(item => item.status === 'todo') || roadmap?.[0];
+
+  const handleGenerateAdvice = async () => {
+    if (!profile || !nextTask) return;
+    setLoadingAdvice(true);
+    setAdviceError(null);
+    try {
+      const res = await fetch('/api/copilot/advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile, nextTask }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setAdvice(data.advice);
+    } catch (err: any) {
+      console.error('[Dashboard] Error fetching advice:', err);
+      setAdviceError(err?.message || 'Error al obtener consejo.');
+    } finally {
+      setLoadingAdvice(false);
+    }
+  };
 
   const handleLogout = async () => {
     clearStore();
@@ -462,9 +488,44 @@ export default function DashboardPage() {
                     <p className="text-white/60 text-sm italic">Sigue tu ritmo establecido.</p>
                   )}
                   
-                  <div className="w-full mt-4 bg-white/10 text-white/50 font-semibold py-2.5 rounded-xl text-sm text-center border border-white/10 cursor-default select-none">
-                    ✨ Consejo personalizado — Próximamente
-                  </div>
+                  {advice ? (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 bg-primary/10 border border-primary/20 rounded-xl p-4 shadow-inner"
+                    >
+                      <p className="text-primary text-sm font-medium leading-relaxed italic">
+                        "{advice}"
+                      </p>
+                    </motion.div>
+                  ) : adviceError ? (
+                    <div className="w-full mt-4 bg-red-500/10 text-red-400 py-3 rounded-xl text-sm text-center border border-red-500/20">
+                      {adviceError}
+                      {adviceError.toLowerCase().includes('límite') && !isPro && (
+                        <button 
+                          onClick={() => setIsPricingModalOpen(true)}
+                          className="block mx-auto mt-2 text-xs font-bold underline hover:text-red-300"
+                        >
+                          Actualizar a Pro
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={handleGenerateAdvice}
+                      disabled={loadingAdvice}
+                      className="w-full mt-4 bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white font-semibold py-2.5 rounded-xl text-sm text-center border border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {loadingAdvice ? (
+                        <>
+                          <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                          Generando...
+                        </>
+                      ) : (
+                        '✨ Obtener consejo personalizado'
+                      )}
+                    </button>
+                  )}
                 </div>
               </motion.div>
 

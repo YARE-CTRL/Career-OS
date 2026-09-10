@@ -6,6 +6,7 @@ import { onboardingSchema } from '@/features/onboarding/schemas/onboardingSchema
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { checkProStatus } from '@/lib/subscription';
+import { resolveUserId } from '@/lib/session';
 
 // ─── Redis (solo si hay credenciales configuradas) ─────────────────────────────
 let redis: Redis | null = null;
@@ -61,7 +62,11 @@ export async function POST(request: Request) {
           request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
           request.headers.get('x-real-ip') ||
           'anonymous';
-        const userId = session.user?.id || session.user?.email || `anon-${ip}`;
+        const userId = resolveUserId(session);
+        if (!userId) {
+          console.error('[generate-system] userId no resoluble. Sesión inválida.');
+          return NextResponse.json({ error: 'Sesión inválida. Vuelve a iniciar sesión.' }, { status: 401 });
+        }
         const fingerprint = request.headers.get('x-fp-id') || `no-fp-${ip}`;
 
         const isPro = await checkProStatus(userId);

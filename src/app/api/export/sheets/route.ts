@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { checkProStatus } from '@/lib/subscription';
 import { z } from 'zod';
+import { resolveUserId } from '@/lib/session';
 
 // FIX SEGURIDAD: Validar payload del cliente con Zod
 const RoadmapItemSchema = z.object({
@@ -36,7 +37,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
     }
 
-    const userId = session.user.id || session.user.email || 'unknown';
+    const userId = resolveUserId(session);
+    if (!userId) {
+      return NextResponse.json({ error: 'Sesión inválida. Vuelve a iniciar sesión.' }, { status: 401 });
+    }
     const isPro = await checkProStatus(userId);
     if (!isPro) {
       return NextResponse.json({ error: 'Esta función requiere Plan Pro.' }, { status: 403 });
