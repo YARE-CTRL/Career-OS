@@ -1,0 +1,30 @@
+﻿{
+  "roadmap": [
+    {
+      "title": "Fundamentos de JavaScript",
+      "type": "learning",
+      "duration": "2 semanas",
+      "description": "Dominar ES6+, async/await y el DOM.",
+      "resources": ["https://javascript.info"],
+      "successCriteria": "Completar 5 proyectos prácticos",
+      "status": "todo"
+    },
+    {
+      "title": "React y Ecosistema",
+      "type": "project",
+      "duration": "3 semanas",
+      "description": "Construir una SPA completa con React 19.",
+      "resources": ["https://react.dev"],
+      "successCriteria": "App deployada en Vercel",
+      "status": "todo"
+    }
+  ],
+  "profile": {
+    "name": "Bryan Hurtado",
+    "currentRole": "Estudiante",
+    "targetRole": "Frontend Developer",
+    "experience": "1 año",
+    "skills": ["HTML", "CSS", "JavaScript básico"],
+    "timeAvailable": "10 horas/semana"
+  }
+}
