@@ -17,7 +17,7 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   });
 }
 
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 2;
 
 function createLimiter(max: number) {
   return new Ratelimit({
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
             {
               error: isPro
                 ? 'Has alcanzado el límite de generaciones de tu plan. Contacta soporte.'
-                : 'Has alcanzado el límite gratuito de 3 roadmaps al mes. Desbloquea el Plan Pro para generar ilimitado.',
+                : 'Has alcanzado el límite gratuito de 2 roadmaps al mes. Desbloquea el Plan Pro para generar ilimitado.',
             },
             {
               status: 429,

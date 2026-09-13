@@ -88,8 +88,9 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
     return () => {
       isMounted = false;
       clearInterval(msgInterval);
+      clearTimeout(fallbackTimeout);
     };
-  }, [formData, onDone, generateRoadmap]);
+  }, []); // <-- Solo ejecutar al montar el paso 4
 
   // ─── Error State ─────────────────────────────────────────────────────────────
 
@@ -176,17 +177,19 @@ export function Step4Processing({ formData, onDone }: Step4Props) {
     >
       {/* Pulsing brain icon with rings + AI background */}
       <motion.div variants={fadeUp} className="relative flex items-center justify-center">
-        {/* Blurred AI visual behind spinner */}
-        <div className="absolute w-52 h-52 rounded-full overflow-hidden -z-10">
-          <Image
-            src="/assets/processing_ai.png"
-            alt=""
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover opacity-30 blur-sm scale-110"
-            aria-hidden
-          />
-        </div>
+          {/* AI Core Holographic Video */}
+          <div className="absolute w-52 h-52 rounded-full overflow-hidden -z-10 flex items-center justify-center">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline 
+              preload="none"
+              className="w-48 h-48 object-cover mix-blend-screen opacity-80"
+            >
+              <source src="/assets/core_holografico.webm" type="video/webm" />
+            </video>
+          </div>
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
@@ -279,14 +282,19 @@ export function Step5Success() {
         }}
         className="relative"
       >
-        {/* Celebration background image */}
-        <div className="absolute -inset-12 rounded-full overflow-hidden -z-10 pointer-events-none" aria-hidden>
-          <Image
-            src="/assets/success_celebration.png"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover opacity-20 blur-[2px] scale-110"
+        {/* Celebration Mesh Gradient Background */}
+        <div className="absolute -inset-12 rounded-full overflow-hidden -z-10 pointer-events-none flex items-center justify-center" aria-hidden>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            transition={{ duration: 1, delay: 0.2 }}
+            className="absolute w-[200px] h-[200px] bg-[#00D4AA]/20 blur-[100px] rounded-full translate-x-10 translate-y-10" 
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            transition={{ duration: 1, delay: 0.4 }}
+            className="absolute w-[200px] h-[200px] bg-[#7B61FF]/15 blur-[100px] rounded-full -translate-x-10 -translate-y-10" 
           />
         </div>
         <div className="w-24 h-24 rounded-full bg-background/20 flex items-center justify-center">

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { X, Zap, Star, Infinity, Check, Loader2 } from "lucide-react";
+import { X, Zap, Star, Infinity, Check, Loader2, Smartphone } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { LocalPaymentModal } from "./LocalPaymentModal";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -67,7 +69,9 @@ const PLANS = [
 ];
 
 export function PricingModal({ isOpen, onClose }: PricingModalProps) {
+  const { data: session } = useSession();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [localPaymentPlan, setLocalPaymentPlan] = useState<{ id: string; name: string; price: string } | null>(null);
 
   // Cerrar con Escape
   useEffect(() => {
@@ -168,16 +172,25 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 ))}
               </ul>
 
-              <button
-                onClick={() => handleSelectPlan(plan.id)}
-                disabled={!!loadingPlan}
-                className={`w-full flex items-center justify-center gap-2 font-bold py-2.5 rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-100 disabled:opacity-60 disabled:cursor-not-allowed ${plan.ctaClass}`}
-              >
-                {loadingPlan === plan.id ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : null}
-                {plan.cta}
-              </button>
+              <div className="flex flex-col gap-2 mt-auto">
+                <button
+                  onClick={() => handleSelectPlan(plan.id)}
+                  disabled={!!loadingPlan}
+                  className={`w-full flex items-center justify-center gap-2 font-bold py-2.5 rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-100 disabled:opacity-60 disabled:cursor-not-allowed ${plan.ctaClass}`}
+                >
+                  {loadingPlan === plan.id ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : null}
+                  {plan.cta}
+                </button>
+                <button
+                  onClick={() => setLocalPaymentPlan({ id: plan.id, name: plan.name, price: plan.price })}
+                  className="w-full flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl text-sm transition-all text-text-main/70 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/10"
+                >
+                  <Smartphone size={14} />
+                  Pagar con Nequi
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -189,6 +202,17 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
           </p>
         </div>
       </div>
+
+      {/* Modal de Pago Local */}
+      {localPaymentPlan && (
+        <LocalPaymentModal
+          isOpen={true}
+          onClose={() => setLocalPaymentPlan(null)}
+          userId={session?.user?.id}
+          planName={localPaymentPlan.name}
+          price={localPaymentPlan.price}
+        />
+      )}
     </div>
   );
 }

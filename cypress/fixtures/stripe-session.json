@@ -1,9 +1,1 @@
-﻿{
-  "id": "cs_test_FAKESESSIONID123456789",
-  "payment_status": "paid",
-  "client_reference_id": "notion-user-pro-456",
-  "metadata": {
-    "userId": "notion-user-pro-456",
-    "plan": "monthly"
-  }
-}
+{"id":"cs_test_FAKE","payment_status":"paid","client_reference_id":"notion-user-pro-456","metadata":{"userId":"notion-user-pro-456","plan":"monthly"}}

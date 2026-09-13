@@ -24,6 +24,9 @@ import {
   Map,
 } from "lucide-react";
 
+import { Meteors } from "@/components/ui/meteors";
+import { BorderBeam } from "@/components/ui/border-beam";
+
 // ─── Animation Variants ───────────────────────────────────────────────────────
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -75,7 +78,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-background overflow-hidden px-6 py-24">
+    <section className="relative min-h-screen flex flex-col items-center justify-center bg-background overflow-hidden px-6 py-24 lg:py-32">
+      {/* Meteors Effect */}
+      <Meteors number={25} />
+      
       {/* Background glow blobs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px]" />
@@ -93,101 +99,105 @@ function HeroSection() {
       />
 
       {/* ─── Two-column layout on large screens ─── */}
-      <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-16">
 
         {/* Left column: text + CTAs */}
         <motion.div
-          className="flex-1 flex flex-col items-center lg:items-start gap-6 text-center lg:text-left"
+          className="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
         >
-          {/* Tag */}
+          {/* Animated Badge */}
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium">
-              <Sparkles size={14} />
-              Impulsado por Inteligencia Artificial
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-bold shadow-[0_0_15px_rgba(0,212,170,0.2)]">
+              <span>⚡</span>
+              Potenciado por IA
             </span>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
             variants={fadeUp}
-            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none text-text-main"
+            className="text-5xl sm:text-7xl font-black tracking-tighter leading-[1.1] text-white"
           >
-            CAREER{" "}
+            Tu Carrera, <br className="hidden lg:block" />
+            Tu{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-              OS AI
+              Roadmap
             </span>
           </motion.h1>
 
           {/* Subheadline */}
           <motion.p
             variants={fadeUp}
-            className="text-lg sm:text-2xl font-semibold text-text-main/80 max-w-2xl"
+            className="text-lg sm:text-xl font-medium text-white/60 max-w-xl"
           >
-            De estudiante a profesional con sistema e IA
+            Deja de adivinar qué estudiar. Nuestra IA analiza tu perfil y mercado para generarte un plan de carrera estructurado y personalizado en segundos.
           </motion.p>
 
-          {/* Body copy */}
-          <motion.p
-            variants={fadeUp}
-            className="text-base sm:text-lg text-text-main/50 max-w-xl"
-          >
-            No es una plantilla. Es tu sistema de crecimiento.
-          </motion.p>
-
-          {/* CTA Buttons */}
+          {/* CTAs */}
           <motion.div
             variants={fadeUp}
-            className="flex flex-col sm:flex-row gap-4 mt-4"
+            className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto"
           >
             <HeroCTA />
             <a
               href="#como-funciona"
-              id="hero-cta-secondary"
-              className="group flex items-center justify-center gap-2 rounded-full border border-text-main/30 text-text-main font-semibold text-base px-8 py-4 hover:border-text-main/70 hover:bg-text-main/5 transition-all duration-300"
+              className="group flex items-center justify-center gap-2 rounded-full border border-white/20 text-white font-semibold text-base px-8 py-4 hover:border-white/40 hover:bg-white/5 transition-all duration-300 w-full sm:w-auto"
             >
-              <Play size={16} className="text-primary" />
+              <Play size={16} className="text-white/70 group-hover:text-white" />
               Ver cómo funciona
             </a>
           </motion.div>
-
-          {/* Social proof strip */}
-          <motion.div
-            variants={fadeUp}
-            className="flex items-center gap-3 mt-2 text-text-main/40 text-sm"
-          >
-            <div className="flex -space-x-2">
-              {["#00D4AA", "#7B61FF", "#FFB347", "#FF6B6B"].map((c, i) => (
-                <div
-                  key={i}
-                  className="w-7 h-7 rounded-full border-2 border-background"
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
-            <span>+200 estudiantes ya usan Career OS AI</span>
-          </motion.div>
         </motion.div>
 
-        {/* Right column: hero image — visible only on lg+ */}
+        {/* Right column: Composed Image */}
         <motion.div
-          className="hidden lg:flex flex-1 items-center justify-center relative"
+          className="relative w-full aspect-square lg:aspect-auto lg:h-[600px] flex items-center justify-center mt-12 lg:mt-0"
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Glow halo behind the image */}
-          <div className="absolute inset-0 rounded-3xl bg-primary/5 blur-3xl scale-110 -z-10" />
-          <Image
-            src="/assets/hero_dashboard_3d.png"
-            alt="Career OS AI — Dashboard preview 3D"
-            width={620}
-            height={420}
-            priority
-            className="rounded-2xl shadow-2xl shadow-primary/20 opacity-90 w-full max-w-[620px] object-cover"
-          />
+          {/* Halo Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+
+          {/* Image Container */}
+          <div className="relative w-full max-w-[620px] rounded-[40px] border border-white/8 overflow-hidden shadow-2xl shadow-black/50 [clip-path:inset(0px_round_40px)]">
+            {/* The Image */}
+            <div className="relative w-full h-[400px] sm:h-[500px] lg:h-[550px]">
+              <Image
+                src="/assets/Hero de la Landing Page - Aspect Ratio 169 o 32 horizontales.jpeg"
+                alt="AI Roadmap Generator 3D"
+                fill
+                priority
+                className="object-cover"
+              />
+              
+              {/* Gradient Mask at bottom to blend with bg-background */}
+              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
+            </div>
+            
+            {/* Floating Badge: IA Activa (Top Right) */}
+            <div className="absolute top-6 right-6 flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 shadow-lg z-10">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-primary opacity-100"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="text-white text-xs font-bold tracking-wide uppercase">🤖 IA activa</span>
+            </div>
+
+            {/* Floating Badge: Generated (Bottom Left) */}
+            <div className="absolute bottom-10 left-[-10px] sm:left-[-20px] md:left-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-xl flex items-center gap-3 z-10">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                <CheckCircle size={20} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm">✓ Roadmap generado</p>
+                <p className="text-white/50 text-xs">en 30 segundos</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
       </div>
@@ -261,70 +271,84 @@ function ProblemsSection() {
 
 // ─── SECTION 3: LA SOLUCIÓN ───────────────────────────────────────────────────
 
-const solutions = [
+const newSolutions = [
   {
-    icon: Layout,
-    title: "Notion como base organizada",
-    desc: "Todo tu sistema en un único workspace estructurado.",
+    tag: "PLAN DE CARRERA",
+    title: "Tu Roadmap Personalizado",
+    desc: "La IA analiza tu perfil y genera un plan de acción semana a semana",
+    img: "/assets/Feature 1 Rutas de Aprendizaje - Aspect Ratio 11 cuadrado.png"
   },
   {
-    icon: Brain,
-    title: "IA que analiza tu perfil",
-    desc: "Genera tu roadmap personalizado según tus metas.",
+    tag: "COPILOTO IA",
+    title: "Consejo cuando lo necesitas",
+    desc: "Un copiloto de IA disponible 24/7 para orientarte en tu carrera",
+    img: "/assets/Feature 2 Copiloto IA - Aspect Ratio 11 cuadrado.png"
   },
   {
-    icon: Briefcase,
-    title: "Job Tracker integrado",
-    desc: "Gestiona cada aplicación con métricas claras.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Portfolio de valor real",
-    desc: "Demuestra lo que sabes, no solo lo que estudias.",
-  },
+    tag: "EXPORTA TODO",
+    title: "Conecta con tus herramientas",
+    desc: "Exporta tu roadmap a Notion, Google Sheets y Google Calendar",
+    img: "/assets/Feature 3 Integración y Exportación - Aspect Ratio 11 cuadrado.png"
+  }
 ];
 
 function SolutionSection() {
   return (
-    <section className="bg-secondary py-24 px-6 relative overflow-hidden">
+    <section className="bg-background py-24 px-6 relative overflow-hidden">
       {/* Background decoration */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-white/5 blur-[80px]" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-primary/10 blur-[60px]" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[100px]" />
       </div>
 
       <motion.div
-        className="max-w-5xl mx-auto relative z-10"
+        className="max-w-6xl mx-auto relative z-10"
         variants={staggerContainer}
         initial="hidden"
         whileInView="visible"
         viewport={vp}
       >
-        <motion.div variants={fadeUp} className="text-center mb-14">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase bg-white/15 text-white mb-4">
-            La Solución
-          </span>
+        <motion.div variants={fadeUp} className="text-center mb-16">
+          <SectionLabel>Características</SectionLabel>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            UN SISTEMA, NO UNA PLANTILLA
+            Un ecosistema inteligente
           </h2>
         </motion.div>
 
         <motion.div
           variants={staggerContainer}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
-          {solutions.map(({ icon: Icon, title, desc }, i) => (
+          {newSolutions.map((sol, i) => (
             <motion.div
               key={i}
               variants={scaleIn}
-              className="group flex items-start gap-4 bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-6 hover:bg-white/15 hover:border-white/25 transition-all duration-300"
+              className="group relative flex flex-col bg-surface/80 backdrop-blur-md border border-white/8 rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/40"
             >
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Icon size={20} className="text-primary" />
+              <BorderBeam size={200} duration={12} delay={i * 2} />
+              
+              {/* Top Image Container */}
+              <div className="relative w-full h-[220px]">
+                <Image
+                  src={sol.img}
+                  alt={sol.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                {/* Gradient mask so it fades into the card body */}
+                <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-90" />
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-surface to-transparent" />
               </div>
-              <div>
-                <p className="text-white font-semibold text-base mb-1">{title}</p>
-                <p className="text-white/60 text-sm leading-relaxed">{desc}</p>
+              
+              {/* Card Body */}
+              <div className="relative p-6 pt-0 flex flex-col flex-1 z-10">
+                <div className="mb-4">
+                  <span className="text-[10px] font-bold tracking-widest text-primary px-3 py-1 bg-primary/10 rounded-full border border-primary/20">
+                    {sol.tag}
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{sol.title}</h3>
+                <p className="text-white/60 text-sm leading-relaxed">{sol.desc}</p>
               </div>
             </motion.div>
           ))}

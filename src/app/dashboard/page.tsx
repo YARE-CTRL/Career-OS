@@ -347,7 +347,8 @@ export default function DashboardPage() {
                         if (remainingGenerations === 0 && !isPro) {
                           setIsPricingModalOpen(true);
                         } else {
-                          clearRoadmap();
+                          // El roadmap NO se limpia aquí para evitar pérdida de datos si el usuario retrocede.
+                          // Se limpiará explícitamente desde el Guard en /onboarding si el usuario confirma "Empezar de cero".
                           router.push('/onboarding');
                         }
                       }}

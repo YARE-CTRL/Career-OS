@@ -1,8 +1,1 @@
-﻿{
-  "user": {
-    "id": "notion-user-free-123",
-    "name": "Test User Free",
-    "email": "notion@careeros.local"
-  },
-  "isPro": false
-}
+{"user":{"id":"notion-user-free-123","name":"Test User Free","email":"notion@careeros.local"},"isPro":false}

@@ -12,6 +12,23 @@ import { Step1Profile } from '@/features/onboarding/components/Step1Profile';
 import { Step2Goals } from '@/features/onboarding/components/Step2Goals';
 import { Step3Skills } from '@/features/onboarding/components/Step3Skills';
 import { Step4Processing, Step5Success } from '@/features/onboarding/components/Step4Processing';
+import dynamic from 'next/dynamic';
+
+const DynamicArtifact = () => {
+  return (
+    <div className="w-[340px] h-[360px] rounded-2xl bg-surface/50 border border-white/5 relative z-10 flex items-center justify-center overflow-hidden">
+      {/* Un diseño abstracto de cristal de la comunidad de Spline. Cargado via iframe para evitar errores de WebAssembly en el Build de Next.js */}
+      <iframe
+        src="https://my.spline.design/6Wq1Q7YGyM-iab9i/"
+        frameBorder="0"
+        width="100%"
+        height="100%"
+        className="absolute inset-0"
+        title="Spline 3D Model"
+      />
+    </div>
+  );
+};
 import type {
   Step1Data,
   Step2Data,
@@ -82,11 +99,12 @@ export default function OnboardingPage() {
   const [hasExistingRoadmap, setHasExistingRoadmap] = useState(false);
 
   // Detectar si ya existe un roadmap generado (evitar duplicados en Notion)
+  // Solo lo activamos si el usuario recién entra (step 1), no después de generar (step 4 o 5)
   useEffect(() => {
-    if (roadmap && roadmap.length > 0) {
+    if (step === 1 && roadmap && roadmap.length > 0) {
       setHasExistingRoadmap(true);
     }
-  }, [roadmap]);
+  }, [roadmap, step]);
 
   // Prevenir pérdida de datos si el usuario intenta cerrar la pestaña a mitad del formulario
   useEffect(() => {
@@ -201,14 +219,7 @@ export default function OnboardingPage() {
         <div className="absolute top-[-10%] left-[-10%] w-[280px] h-[280px] rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
         <div className="absolute bottom-[-5%] right-[-5%] w-[200px] h-[200px] rounded-full bg-secondary/10 blur-[60px] pointer-events-none" />
 
-        <Image
-          src="/assets/onboarding_side.png"
-          alt="Tu trayectoria profesional"
-          width={340}
-          height={360}
-          priority
-          className="rounded-2xl opacity-85 relative z-10 w-full max-w-[340px]"
-        />
+        <DynamicArtifact />
 
         <div className="mt-8 text-center relative z-10">
           <p className="text-white font-bold text-lg tracking-tight">
