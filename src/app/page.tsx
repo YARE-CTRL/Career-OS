@@ -375,7 +375,7 @@ const steps = [
   {
     number: "02",
     title: "La IA genera tu roadmap personalizado",
-    desc: "Algoritmos que analizan el mercado laboral y tu perfil para darte el camino exacto.",
+    desc: "En segundos, recibes un plan de carrera estructurado semana a semana basado en tu perfil, objetivos y sector.",
     icon: Brain,
     bg: "bg-secondary",
     accent: "text-primary",
@@ -385,8 +385,8 @@ const steps = [
   },
   {
     number: "03",
-    title: "Registra cursos, proyectos y aplicaciones",
-    desc: "Un dashboard unificado para llevar tu progreso sin perder el hilo.",
+    title: "Revisa tu roadmap en el dashboard",
+    desc: "Visualiza tu plan semana a semana, con recursos, criterios de éxito y el estado de cada etapa.",
     icon: BookOpen,
     bg: "bg-surface",
     accent: "text-primary",
@@ -396,8 +396,8 @@ const steps = [
   },
   {
     number: "04",
-    title: "Recibe recomendaciones semanales",
-    desc: "La IA adapta tu plan según tus avances y el estado del mercado.",
+    title: "Consulta al Copiloto IA cuando quieras",
+    desc: "Pregúntale al Copiloto dudas de carrera, tecnologías o tu siguiente paso. Respuestas basadas en tu perfil.",
     icon: Sparkles,
     bg: "bg-primary",
     accent: "text-background",
@@ -570,16 +570,16 @@ function ForWhomSection() {
 // ─── SECTION 6: PRECIOS ───────────────────────────────────────────────────────
 
 const starterFeatures = [
-  "Perfil profesional",
-  "Learning Tracker básico",
-  "Job Tracker básico",
+  "Genera tu roadmap personalizado con IA",
+  "Perfil profesional básico",
+  "Acceso al dashboard de carrera",
 ];
 
 const proFeatures = [
-  "Todo el sistema completo",
-  "IA Copiloto activada",
-  "Revisiones semanales",
-  "Soporte prioritario",
+  "Todo lo del plan gratuito",
+  "Copiloto IA para consejería de carrera",
+  "Exportar roadmap a Notion",
+  "Exportar a Google Sheets y Google Calendar",
 ];
 
 function PricingSection() {
@@ -655,8 +655,8 @@ function PricingSection() {
                 Plan Pro
               </p>
               <div className="flex items-end gap-2">
-                <span className="text-5xl font-black text-background">7</span>
-                <span className="text-background/70 font-semibold mb-2">USD</span>
+                <span className="text-5xl font-black text-background">9.900</span>
+                <span className="text-background/70 font-semibold mb-2">COP</span>
               </div>
               <p className="text-background/60 text-sm mt-1">
                 Pago único de lanzamiento
@@ -714,27 +714,7 @@ function CtaSection() {
           </h2>
         </motion.div>
 
-        {/* Social proof */}
-        <motion.div
-          variants={fadeUp}
-          className="flex flex-col sm:flex-row items-center gap-3"
-        >
-          <div className="flex -space-x-2">
-            {["#00D4AA", "#7B61FF", "#FFB347", "#FF6B6B", "#60BAFF"].map(
-              (c, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full border-2 border-secondary"
-                  style={{ backgroundColor: c }}
-                />
-              )
-            )}
-          </div>
-          <p className="text-white/70 text-sm">
-            <strong className="text-white">Más de 200 estudiantes</strong> ya
-            usan Career OS AI
-          </p>
-        </motion.div>
+
 
         {/* Buttons */}
         <motion.div
@@ -746,19 +726,18 @@ function CtaSection() {
             id="cta-final-primary"
             className="group flex items-center justify-center gap-2 rounded-full bg-primary text-background font-bold text-base px-8 py-4 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300"
           >
-            Obtener Career OS AI — 7 USD
+            Obtener Career OS AI — 9.900 COP
             <ArrowRight
               size={18}
               className="group-hover:translate-x-1 transition-transform"
             />
           </Link>
           <Link
-            href="/dashboard"
+            href="/onboarding"
             id="cta-final-secondary"
             className="flex items-center justify-center gap-2 rounded-full border border-white/25 text-white font-semibold text-base px-8 py-4 hover:border-white/50 hover:bg-white/10 transition-all duration-300"
           >
-            <Play size={16} />
-            Ver demo gratis
+            Comenzar gratis
           </Link>
         </motion.div>
 
@@ -784,7 +763,7 @@ function Footer() {
           </span>
         </span>
         <p className="text-text-main/30 text-sm">
-          © 2025 Career OS AI. Todos los derechos reservados.
+          © 2026 Career OS AI. Todos los derechos reservados.
         </p>
       </div>
     </footer>
