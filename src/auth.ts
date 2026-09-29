@@ -47,7 +47,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async redirect({ url, baseUrl }) {
       console.log(`[REDIRECT_CALLBACK_V2] URL: ${url} | Base URL: ${baseUrl}`);
-      return url;
+      // Evitar open redirect:
+      // Si la URL es relativa, añade la baseUrl.
+      if (url.startsWith("/")) return new URL(url, baseUrl).toString();
+      // Si la URL ya es absoluta, permite solo si coincide con el mismo origen (baseUrl).
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
     async session({ session, token }) {
       // Exponer el access_token de Notion en la sesión del cliente
