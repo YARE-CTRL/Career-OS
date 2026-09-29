@@ -124,47 +124,46 @@ describe('Suite 03 — Admin Grant API: Seguridad y Validación', () => {
   // ──────────────────────────────────────────────────────────────
 
   it('03-I: Activar un userId válido con secret correcto retorna 200 y mensaje de éxito', () => {
-    const adminSecret = Cypress.env('ADMIN_SECRET');
-    if (!adminSecret) {
-      cy.log('⚠️  ADMIN_SECRET no configurado en cypress.env.json — saltando prueba de activación real');
-      return;
-    }
-
-    cy.request({
-      method: 'POST',
-      url: GRANT_URL,
-      body: {
-        userId: 'cypress-test-user-do-not-use',
-        secret: adminSecret,
-        planId: 'monthly',
-      },
-      failOnStatusCode: false,
-    }).then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.body.success).to.equal(true);
-      expect(res.body.message).to.include('cypress-test-user-do-not-use');
+    cy.env('ADMIN_SECRET').then((adminSecret) => {
+      if (!adminSecret) {
+        cy.log('⚠️  ADMIN_SECRET no configurado — saltando prueba de activación real');
+        return;
+      }
+      cy.request({
+        method: 'POST',
+        url: GRANT_URL,
+        body: {
+          userId: 'cypress-test-user-do-not-use',
+          secret: adminSecret,
+          planId: 'monthly',
+        },
+        failOnStatusCode: false,
+      }).then((res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.success).to.equal(true);
+        expect(res.body.message).to.include('cypress-test-user-do-not-use');
+      });
     });
   });
 
   it('03-J: Intentar activar planId inexistente igual activa plan por defecto (monthly)', () => {
-    const adminSecret = Cypress.env('ADMIN_SECRET');
-    if (!adminSecret) {
-      cy.log('⚠️  ADMIN_SECRET no configurado — saltando');
-      return;
-    }
-
-    cy.request({
-      method: 'POST',
-      url: GRANT_URL,
-      body: {
-        userId: 'cypress-test-user-do-not-use',
-        secret: adminSecret,
-        planId: 'PLAN_QUE_NO_EXISTE',
-      },
-    }).then((res) => {
-      expect(res.status).to.equal(200);
-      // El servidor debe ignorar el plan inválido y asignar 'monthly' como fallback
-      expect(res.body.message).to.include('monthly');
+    cy.env('ADMIN_SECRET').then((adminSecret) => {
+      if (!adminSecret) {
+        cy.log('⚠️  ADMIN_SECRET no configurado — saltando');
+        return;
+      }
+      cy.request({
+        method: 'POST',
+        url: GRANT_URL,
+        body: {
+          userId: 'cypress-test-user-do-not-use',
+          secret: adminSecret,
+          planId: 'PLAN_QUE_NO_EXISTE',
+        },
+      }).then((res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.message).to.include('monthly');
+      });
     });
   });
 
