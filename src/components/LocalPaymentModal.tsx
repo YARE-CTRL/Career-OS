@@ -37,9 +37,9 @@ export function LocalPaymentModal({
 
   if (!isOpen) return null;
 
-  // Número de WhatsApp (puedes cambiarlo)
+  // Número de WhatsApp
   const WHATSAPP_NUMBER = "573053421833"; 
-  const message = `Hola! Acabo de transferir ${price} COP para el plan ${planName} de Career OS. Mi User ID es: ${userId || "desconocido"}. Aquí adjunto el comprobante:`;
+  const message = `Buen día equipo de Career OS, quiero confirmar un pago de ${price} COP del ${planName}. Mi User ID es: ${userId || "desconocido"}. Quedo atento a la llave / número de Nequi para realizar la consignación.`;
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     message
   )}`;
@@ -65,8 +65,8 @@ export function LocalPaymentModal({
               <Smartphone size={20} className="text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Pago con Nequi</h3>
-              <p className="text-sm text-white/50">Transferencia manual rápida</p>
+              <h3 className="text-lg font-bold text-white">Pago Manual (Nequi)</h3>
+              <p className="text-sm text-white/50">Atención personalizada por WhatsApp</p>
             </div>
           </div>
         </div>
@@ -78,24 +78,8 @@ export function LocalPaymentModal({
               <div className="mt-1">
                 <CheckCircle2 size={16} className="text-primary" />
               </div>
-              <div>
-                <p className="text-sm text-white/90">
-                  Transfiere exactamente <strong className="text-primary">${price} COP</strong> a la siguiente cuenta Nequi:
-                </p>
-                <div className="mt-2 bg-background p-3 rounded-xl border border-white/10 text-center">
-                  <p className="text-2xl font-black text-white tracking-widest">
-                    300 000 0000
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="mt-1">
-                <CheckCircle2 size={16} className="text-primary" />
-              </div>
               <p className="text-sm text-white/90">
-                Toma una captura de pantalla (screenshot) del comprobante exitoso.
+                Haz clic en el botón de abajo para iniciar una conversación segura con nuestro equipo en WhatsApp.
               </p>
             </div>
 
@@ -104,7 +88,16 @@ export function LocalPaymentModal({
                 <CheckCircle2 size={16} className="text-primary" />
               </div>
               <p className="text-sm text-white/90">
-                Haz clic en el botón de abajo para enviarnos el comprobante por WhatsApp. Tu cuenta será activada en menos de 5 minutos.
+                Allí te proporcionaremos el <strong>número de Nequi oficial</strong> para que realices la consignación de <strong className="text-primary">${price} COP</strong>.
+              </p>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="mt-1">
+                <CheckCircle2 size={16} className="text-primary" />
+              </div>
+              <p className="text-sm text-white/90">
+                Una vez nos envíes el comprobante, activaremos tu cuenta Pro en menos de 5 minutos.
               </p>
             </div>
           </div>
@@ -115,7 +108,7 @@ export function LocalPaymentModal({
             rel="noopener noreferrer"
             className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-3.5 rounded-xl transition-all hover:bg-[#20bd5a] hover:scale-[1.02]"
           >
-            Enviar Comprobante por WhatsApp
+            Contactar por WhatsApp
             <ArrowRight size={18} />
           </a>
         </div>

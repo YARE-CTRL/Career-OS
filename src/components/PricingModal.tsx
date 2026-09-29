@@ -13,59 +13,22 @@ interface PricingModalProps {
 const PLANS = [
   {
     id: "monthly",
-    name: "Mensual",
+    name: "Plan Pro",
     price: "9.900",
-    period: "/mes",
-    description: "Puerta de entrada",
-    badge: null,
-    icon: <Zap size={20} className="text-blue-400" />,
-    borderClass: "border-text-main/10",
-    features: [
-      "Generaciones ilimitadas",
-      "Roadmap personalizado con IA",
-      "Sincronización con Notion",
-      "Soporte estándar",
-    ],
-    cta: "Comenzar",
-    ctaClass: "bg-surface hover:bg-white/5 text-text-main border border-text-main/20",
-  },
-  {
-    id: "annual",
-    name: "Anual",
-    price: "79.900",
-    period: "/año",
-    subPrice: "≈ 6.658/mes · Ahorra 33%",
-    description: "Más popular",
+    period: "/único", // O mensual, según indique (dejaremos único o mensual)
+    description: "Acceso completo al sistema",
     badge: "⭐ Más Popular",
     icon: <Star size={20} className="text-yellow-400" />,
     borderClass: "border-primary/40 shadow-xl shadow-primary/10",
     features: [
-      "Todo lo del plan Mensual",
+      "Generaciones ilimitadas",
+      "Roadmap personalizado con IA",
       "Export a Google Sheets",
-      "Sync con Google Calendar",
-      "Soporte prioritario",
+      "Copiloto IA activado",
     ],
-    cta: "Obtener Pro",
+    cta: "Comenzar ahora",
     ctaClass: "bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90",
-  },
-  {
-    id: "lifetime",
-    name: "Lifetime",
-    price: "149.900",
-    period: " único",
-    description: "Para siempre",
-    badge: null,
-    icon: <Infinity size={20} className="text-purple-400" />,
-    borderClass: "border-purple-500/20",
-    features: [
-      "Todo lo del plan Anual",
-      "Acceso de por vida",
-      "Futuras funcionalidades",
-      "Acceso anticipado a novedades",
-    ],
-    cta: "Comprar",
-    ctaClass: "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30",
-  },
+  }
 ];
 
 export function PricingModal({ isOpen, onClose }: PricingModalProps) {
@@ -130,12 +93,12 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             <h2 className="text-2xl font-black text-white">Desbloquea Career OS Pro</h2>
           </div>
           <p className="text-text-main/50 text-sm max-w-md mx-auto">
-            Has usado tus generaciones gratuitas de este mes. Elige tu plan y sigue construyendo tu carrera sin límites.
+            Para continuar construyendo tu carrera con el Copiloto IA y acceso ilimitado, obtén el Plan Pro. Pago único, acceso permanente.
           </p>
         </div>
 
         {/* Planes */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+        <div className="max-w-md mx-auto p-6">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
@@ -158,10 +121,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 <span className="text-3xl font-black text-white">${plan.price}</span>
                 <span className="text-text-main/40 text-sm"> COP{plan.period}</span>
               </div>
-              {plan.subPrice && (
-                <p className="text-xs text-primary font-semibold mb-3">{plan.subPrice}</p>
-              )}
-              {!plan.subPrice && <div className="mb-3" />}
+              <div className="mb-3" />
 
               <ul className="flex flex-col gap-2 mb-5 flex-1">
                 {plan.features.map((f) => (
