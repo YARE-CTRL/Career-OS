@@ -91,9 +91,7 @@ export default function AdminPage() {
                 onChange={(e) => setPlanId(e.target.value)}
                 className="flex h-9 w-full rounded-md border border-white/10 bg-background/50 px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-white"
               >
-                <option value="monthly">Mensual (9.900 COP)</option>
-                <option value="annual">Anual (79.900 COP)</option>
-                <option value="lifetime">Lifetime (149.900 COP)</option>
+                <option value="monthly">Plan Pro (9.900 COP - Único)</option>
               </select>
             </div>
 
