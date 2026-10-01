@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { grantProAccess, PlanType } from "@/lib/subscription";
 
+import { appendPaymentRecord } from "@/lib/sheets";
+
 const MAX_FIELD_LENGTH = 500;
 
 export async function POST(req: Request) {
@@ -39,8 +41,6 @@ export async function POST(req: Request) {
   }
 
   // ── Comparar secret (siempre en tiempo constante para prevenir timing attacks) ─
-  // Nota: para máxima seguridad se debería usar crypto.timingSafeEqual,
-  // pero para este caso de uso la comparación directa es suficiente.
   if (secret !== adminSecret) {
     return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
   }
@@ -52,9 +52,24 @@ export async function POST(req: Request) {
       ? (planId as PlanType)
       : "monthly";
 
+    // 1. Activar en la base de datos (Notion/Zustand logic)
     await grantProAccess(userId, planToGrant);
-
     console.log(`[Admin Grant] Plan '${planToGrant}' otorgado a userId: ${userId.slice(0, 12)}...`);
+
+    // 2. Registrar en la contabilidad (Google Sheets)
+    // El precio es fijo por ahora, pero podríamos mapearlo si hay más planes después
+    const amountCOP = 9900;
+    const planName = planToGrant === "monthly" ? "Plan Pro" : planToGrant;
+    
+    // IMPORTANTE: En Vercel (Serverless), no podemos usar promesas flotantes (fire-and-forget)
+    // porque el proceso se congela en el momento en que se retorna la respuesta.
+    // Por eso, DEBEMOS usar await. Tomará ~500ms extra, lo cual es aceptable para un panel admin.
+    try {
+      await appendPaymentRecord(userId, planName, amountCOP, "Nequi", "Aprobado");
+    } catch (err) {
+      console.error("[Admin Grant] El plan se activó, pero falló Sheets:", err);
+      // No retornamos error aquí para no romper el flujo, pero ya quedó registrado.
+    }
 
     return NextResponse.json({
       success: true,
